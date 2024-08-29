@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+
+  clientes-db:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: clientesdb
+    volumes:
+      - clientes_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - clientes-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+
+  usuarios-db:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: usuariosdb
+    volumes:
+      - usuarios_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - usuarios-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+
+  incidentes-db:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: incidentesdb
+    volumes:
+      - incidentes_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - incidentes-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - GESTOR_CLIENTES_BASE_URL=http://gestor-clientes:5000
+      - GENERACION_REPORTES_BASE_URL=http://generacion-reportes:5000
+      - GESTOR_INCIDENTES_BASE_URL=http://gestor-incidentes:5000
+      - GESTOR_FIDELIZACION_BASE_URL=http://gestor-fidelizacion:5000
+      - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
+    networks:
+      - usuarios-net
+      - abcall-net
+    depends_on:
+      usuarios-db:
+        condition: service_healthy
+
+  gestor-clientes:
+    build:
+      context: ./gestor-clientes
+    ports:
+      - "5001:5000"
+    environment:
+      - GENERACION_REPORTES_BASE_URL=http://generacion-reportes:5002
+      - DATABASE_URL=postgresql://postgres:postgres@clientes-db:5432/clientesdb
+    networks:
+      - clientes-net
+      - abcall-net
+    depends_on:
+      clientes-db:
+        condition: service_healthy
+      
+
+  generacion-reportes:
+    build:
+      context: ./generacion-reportes
+    ports:
+      - "5002:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
+    networks:
+      - incidentes-net
+      - abcall-net
+    depends_on:
+      incidentes-db:
+        condition: service_healthy
+
+    
+  
+  gestor-incidentes:
+    build:
+      context: ./gestor-incidentes
+    ports:
+      - "5003:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
+      - VIEW_360_BASE_URL=http://vista-360:5005
+    networks:
+      - incidentes-net
+      - abcall-net
+    depends_on:
+      incidentes-db:
+        condition: service_healthy
+
+  gestor-fidelizacion:
+    build:
+      context: ./gestor-fidelizacion
+    ports:
+      - "5004:5000"
+    environment:
+      - VIEW_360_BASE_URL=http://vista-360:5000
+    networks:
+      - abcall-net
+
+  vista-360:
+    build:
+      context: ./vista-360
+    ports:
+      - "5005:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
+    networks:
+      - abcall-net
+      - usuarios-net
+    depends_on:
+      usuarios-db:
+        condition: service_healthy
+
+volumes:
+  usuarios_data:
+  clientes_data:
+  incidentes_data:
+
+networks:
+  abcall-net:
+    driver: bridge
+  clientes-net:
+    driver: bridge
+  usuarios-net:
+    driver: bridge
+  incidentes-net:
+    driver: bridge
