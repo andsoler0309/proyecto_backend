@@ -56,6 +56,25 @@ services:
       timeout: 5s
       retries: 5
 
+  agentes-db:
+    image: postgres:14.1-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: agentesdb
+    volumes:
+      - agentes_data:/var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    networks:
+      - agentes-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 2s
+      timeout: 5s
+      retries: 5
+
+
   api-gateway:
     build:
       context: ./api-gateway
@@ -67,6 +86,8 @@ services:
       - GESTOR_INCIDENTES_BASE_URL=http://gestor-incidentes:5000
       - GESTOR_FIDELIZACION_BASE_URL=http://gestor-fidelizacion:5000
       - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
+      - GESTOR_AGENTES_BASE_URL=http://gestor-agentes:5000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     networks:
       - usuarios-net
       - abcall-net
@@ -80,7 +101,7 @@ services:
     ports:
       - "5001:5000"
     environment:
-      - GENERACION_REPORTES_BASE_URL=http://generacion-reportes:5002
+      - GENERACION_REPORTES_BASE_URL=http://generacion-reportes:5000
       - DATABASE_URL=postgresql://postgres:postgres@clientes-db:5432/clientesdb
     networks:
       - clientes-net
@@ -97,6 +118,7 @@ services:
       - "5002:5000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
+      - VIEW_360_BASE_URL=http://vista-360:5000
     networks:
       - incidentes-net
       - abcall-net
@@ -113,7 +135,7 @@ services:
       - "5003:5000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
-      - VIEW_360_BASE_URL=http://vista-360:5005
+      - VIEW_360_BASE_URL=http://vista-360:5000
     networks:
       - incidentes-net
       - abcall-net
@@ -145,10 +167,25 @@ services:
       usuarios-db:
         condition: service_healthy
 
+  gestor-agentes:
+    build:
+      context: ./gestor-agentes
+    ports:
+      - "5006:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@agentes-db:5432/agentesdb
+    networks:
+      - abcall-net
+      - agentes-net
+    depends_on:
+      agentes-db:
+        condition: service_healthy
+
 volumes:
   usuarios_data:
   clientes_data:
   incidentes_data:
+  agentes_data:
 
 networks:
   abcall-net:
@@ -158,4 +195,6 @@ networks:
   usuarios-net:
     driver: bridge
   incidentes-net:
+    driver: bridge
+  agentes-net:
     driver: bridge

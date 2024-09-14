@@ -142,6 +142,7 @@ cython_debug/
 #VSC Settings
 .vscode
 .idea/*
-
+/.idea/*
+.idea
 #DataBase
 test.db

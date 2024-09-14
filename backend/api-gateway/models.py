@@ -1,8 +1,8 @@
 from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Enum as SQLAEnum
 from enum import Enum
+import uuid
 
 
 db = SQLAlchemy()
@@ -11,19 +11,16 @@ db = SQLAlchemy()
 class UserRole(Enum):
     ADMIN = "admin"
     USER = "user"
+    AGENT = "agent"
 
 
-class UserToken(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(50), nullable=False)
-    role = db.Column(SQLAEnum(UserRole), nullable=False)
+class Verification(db.Model):
+    __tablename__ = 'verifications'
 
+    verification_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    agent_id = db.Column(db.String(36), nullable=False)
+    security_question = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-class AdminCadenaSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = UserToken
-        include_relationships = True
-        load_instance = True
-
-    id = fields.String()
+    def __repr__(self):
+        return f"<Verification {self.verification_id} for Agent {self.agent_id}>"

@@ -32,7 +32,17 @@ spec:
             - name: GESTOR_FIDELIZACION_BASE_URL
               value: http://servicio-gestor-fidelizacion
             - name: DATABASE_URL
-              value: postgresql+psycopg2://postgres:1234@192.168.0.3/postgres
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+            - name: GESTOR_AGENTES_BASE_URL
+              value: http://servicio-gestor-agentes
+            - name: OPENAI_API_KEY
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets
+                    key: OPENAI_API_KEY
           # Realizar pull siempre a la imagen
           imagePullPolicy: Always
 
@@ -66,121 +76,64 @@ spec:
 
 ---
 ###################################
-# gestor-clientes
+# gestor-agentes
 ###################################
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gestor-clientes
+  name: gestor-agentes
   labels:
-    app: gestor-clientes
+    app: gestor-agentes
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gestor-clientes
+      app: gestor-agentes
   template:
     metadata:
       labels:
-        app: gestor-clientes
+        app: gestor-agentes
     spec:
       containers:
-        - name: gestor-clientes
-          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-clientes:latest
+        - name: gestor-agentes
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-agentes:latest
           ports:
             - containerPort: 5000
           env:
-            - name: GENERACION_REPORTES_BASE_URL
-              value: http://servicio-generacion-reportes
             - name: DATABASE_URL
-              value: postgresql+psycopg2://postgres:1234@192.168.0.3/postgres
-          # Realizar pull siempre a la imagen
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
           imagePullPolicy: Always
 
 ---
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
 metadata:
-  name: gestor-clientes-config
+  name: gestor-agentes-config
 spec:
   healthCheck:
     checkIntervalSec: 30
     port: 5000
     type: HTTP
-    requestPath: /gestor-clientes/ping
+    requestPath: /gestor-agentes/ping
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: servicio-gestor-clientes
+  name: servicio-gestor-agentes
   annotations:
-    cloud.google.com/backend-config: '{"default": "gestor-clientes-config"}'
+    cloud.google.com/backend-config: '{"default": "gestor-agentes-config"}'
 spec:
   type: NodePort
   selector:
-    app: gestor-clientes
+    app: gestor-agentes
   ports:
     - protocol: TCP
       port: 80
       targetPort: 5000
-      nodePort: 31021
----
-###################################
-# generacion-reportes
-###################################
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: generacion-reportes
-  labels:
-    app: generacion-reportes
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: generacion-reportes
-  template:
-    metadata:
-      labels:
-        app: generacion-reportes
-    spec:
-      containers:
-        - name: generacion-reportes
-          image: us-central1-docker.pkg.dev/abcall/abcall/generacion-reportes:latest
-          ports:
-            - containerPort: 5000
-          env:
-            - name: DATABASE_URL
-              value: postgresql+psycopg2://postgres:1234@192.168.0.3/postgres
-          imagePullPolicy: Always
----
-apiVersion: cloud.google.com/v1
-kind: BackendConfig
-metadata:
-  name: generacion-reportes-config
-spec:
-  healthCheck:
-    checkIntervalSec: 30
-    port: 5000
-    type: HTTP
-    requestPath: /generacion-reportes/ping
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: servicio-generacion-reportes
-  annotations:
-    cloud.google.com/backend-config: '{"default": "generacion-reportes-config"}'
-spec:
-  type: NodePort
-  selector:
-    app: generacion-reportes
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
-      nodePort: 31022
+      nodePort: 31026
 ---
 ###################################
 # gestor-incidentes
@@ -208,9 +161,10 @@ spec:
             - containerPort: 5000
           env:
             - name: DATABASE_URL
-              value: postgresql+psycopg2://postgres:1234@192.168.0.3/postgres
-            - name: VIEW_360_BASE_URL
-              value: http://servicio-vista-360
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
           imagePullPolicy: Always
 
 ---
@@ -241,116 +195,3 @@ spec:
       targetPort: 5000
       nodePort: 31023
 ---
-###################################
-# gestor-fidelizacion
-###################################
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: gestor-fidelizacion
-  labels:
-    app: gestor-fidelizacion
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: gestor-fidelizacion
-  template:
-    metadata:
-      labels:
-        app: gestor-fidelizacion
-    spec:
-      containers:
-        - name: gestor-fidelizacion
-          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-fidelizacion:latest
-          ports:
-            - containerPort: 5000
-          env:
-            - name: VIEW_360_BASE_URL
-              value: http://servicio-vista-360
-          imagePullPolicy: Always
-
----
-apiVersion: cloud.google.com/v1
-kind: BackendConfig
-metadata:
-  name: gestor-fidelizacion-config
-spec:
-  healthCheck:
-    checkIntervalSec: 30
-    port: 5000
-    type: HTTP
-    requestPath: /gestor-fidelizacion/ping
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: servicio-gestor-fidelizacion
-  annotations:
-    cloud.google.com/backend-config: '{"default": "gestor-fidelizacion-config"}'
-spec:
-  type: NodePort
-  selector:
-    app: gestor-fidelizacion
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
-      nodePort: 31024
----
-###################################
-# vista-360
-###################################
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: vista-360
-  labels:
-    app: vista-360
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: vista-360
-  template:
-    metadata:
-      labels:
-        app: vista-360
-    spec:
-      containers:
-        - name: vista-360
-          image: us-central1-docker.pkg.dev/abcall/abcall/vista-360:latest
-          ports:
-            - containerPort: 5000
-          env:
-            - name: DATABASE_URL
-              value: postgresql+psycopg2://postgres:1234@192.168.0.3/postgres
-          imagePullPolicy: Always
-
----
-apiVersion: cloud.google.com/v1
-kind: BackendConfig
-metadata:
-  name: vista-360-config
-spec:
-  healthCheck:
-    checkIntervalSec: 30
-    port: 5000
-    type: HTTP
-    requestPath: /vista-360/ping
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: servicio-vista-360
-  annotations:
-    cloud.google.com/backend-config: '{"default": "vista-360-config"}'
-spec:
-  type: NodePort
-  selector:
-    app: vista-360
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
-      nodePort: 31025

@@ -36,6 +36,14 @@ docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/abcall/abcall/
 docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/abcall/abcall/vista-360:latest -f ./vista-360/Dockerfile ./vista-360
 ```
 
+experimento
+```shell
+docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/abcall/abcall/api-gateway:latest -f ./api-gateway/Dockerfile ./api-gateway
+docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/abcall/abcall/gestor-incidentes:latest -f ./gestor-incidentes/Dockerfile ./gestor-incidentes
+docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/abcall/abcall/gestor-agentes:latest -f ./gestor-agentes/Dockerfile ./gestor-agentes
+```
+
+
 ### 4. Publicar las imagenes en container registry
 
 ```shell
@@ -45,6 +53,13 @@ docker push us-central1-docker.pkg.dev/abcall/abcall/generacion-reportes:latest
 docker push us-central1-docker.pkg.dev/abcall/abcall/gestor-incidentes:latest
 docker push us-central1-docker.pkg.dev/abcall/abcall/gestor-fidelizacion:latest
 docker push us-central1-docker.pkg.dev/abcall/abcall/vista-360:latest
+```
+
+experimento
+```shell
+docker push us-central1-docker.pkg.dev/abcall/abcall/api-gateway:latest
+docker push us-central1-docker.pkg.dev/abcall/abcall/gestor-incidentes:latest
+docker push us-central1-docker.pkg.dev/abcall/abcall/gestor-agentes:latest
 ```
 
 ## Creacion de base de datos y red virtual
@@ -127,7 +142,7 @@ kubectl delete all --all -n default
 
 - Aplicar secretos si se tiene
 ```shell
-kubectl apply -f deployment/secrets.yml
+kubectl apply -f deployment/k8s-secrets.yaml
 ```
 
 - Aplicar deployment servicios (experimento)

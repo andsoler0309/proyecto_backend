@@ -1,76 +1,48 @@
-from flask import Flask, request
+# app.py
+from flask import Flask
+from flask_restful import Api
+from views import *
+from config import Config
 from flask_cors import CORS
-from monitor import monitor_registration_errors
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity
-from models import UserRole, db
-import requests
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from models import db
+import logging
+from logging.handlers import RotatingFileHandler
 import os
 
-from token_service import roles_required
 
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["PROPAGATE_EXCEPTIONS"] = True
-app_context = app.app_context()
-app_context.push()
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-db.init_app(app)
-db.create_all()
+    app_context = app.app_context()
+    app_context.push()
 
-cors = CORS(app, resources={r"/*": {"origins": "*"}})
+    # Initialize Extensions
+    db.init_app(app)
+    db.create_all()
+    # migrate = Migrate(app, db)
 
-app.config['JWT_SECRET_KEY'] = 'frase-secreta'
-jwt = JWTManager(app)
+    cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
-GESTOR_CLIENTES_BASE_URL = os.getenv("GESTOR_CLIENTES_BASE_URL")
-GENERACION_REPORTES_BASE_URL = os.getenv("GENERACION_REPORTES_BASE_URL")
-GESTOR_INCIDENTES_BASE_URL = os.getenv("GESTOR_INCIDENTES_BASE_URL")
-GESTOR_FIDELIZACION_BASE_URL = os.getenv("GESTOR_FIDELIZACION_BASE_URL")
-DATABASE_URL = os.getenv("DATABASE_URL")
+    api = Api(app)
 
+    # Register API resources
+    api.add_resource(Login, '/agents/login', endpoint='login', methods=['POST'])
+    api.add_resource(VerifySecurityAnswer, '/agents/verify-security-answer', endpoint='verify_security_answer', methods=['POST'])
+    api.add_resource(ProtectedResource, '/protected', endpoint='protected', methods=['GET'])
+    api.add_resource(RoleProtectedResource, '/role-protected', endpoint='role-protected', methods=['GET'])
+    api.add_resource(Ping, '/api-gateway/ping', endpoint='ping', methods=['GET'])
+    api.add_resource(CreateAgent, '/agents', endpoint='create_agent', methods=['POST'])
+    api.add_resource(DeleteAgent, '/agents/<string:agent_id>', endpoint='delete_agent', methods=['DELETE'])
+    api.add_resource(CreateIncident, '/incidents', endpoint='create_incident', methods=['POST'])
+    api.add_resource(DeleteIncident, '/incidents/<string:incident_id>', endpoint='delete_incident', methods=['DELETE'])
 
-@app.route('/client/register', methods=['POST'])
-@monitor_registration_errors
-def register_candidate():
-    response = requests.post(f'{GESTOR_CLIENTES_BASE_URL}/signin', json=request.json)
-    return response.json(), response.status_code
-
-
-@app.route('/client/login', methods=['POST'])
-def login():
-    response = requests.post(f'{GESTOR_CLIENTES_BASE_URL}/login', json=request.json, headers=dict(request.headers))
-
-    if response.status_code == 200:
-        user_data = response.json()
-        role = UserRole(user_data['role']).value  # Ensuring the role is the enum value
-        access_token = create_access_token(identity={'email': user_data['email'], 'role': role})
-
-        response = response.json()
-        response["access_token"] = access_token
-
-        return response, 200
-    else:
-        return {"msg": "Bad username or password"}, 401
+    return app
 
 
-@app.route('/incidents', methods=['GET'])
-@roles_required([UserRole.ADMIN])
-def get_all_incidents():
-    # current_user = get_jwt_identity()
-    response = requests.get(f'{GESTOR_INCIDENTES_BASE_URL}/incidents', headers=dict(request.headers))
-    return response.json(), response.status_code
+app = create_app()
 
-
-@app.route('/user/<int:user_id>', methods=['GET'])
-@roles_required([UserRole.ADMIN])
-def get_user_information(user_id):
-    response = requests.get(f'{GESTOR_FIDELIZACION_BASE_URL}/user/{user_id}', headers=dict(request.headers))
-    return response.json(), response.status_code
-
-
-@app.route('/api-gateway/ping', methods=['GET'])
-def ping():
-    return {
-        "status": "healthy"
-    }
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

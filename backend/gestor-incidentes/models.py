@@ -1,20 +1,21 @@
-import enum
+import uuid
 from flask_sqlalchemy import SQLAlchemy
-from marshmallow import fields
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-
 
 db = SQLAlchemy()
 
 
 class Incident(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    description = db.Column(db.Text(), nullable=True)
+    __tablename__ = 'incidents'
 
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    agent_id = db.Column(db.String(36), nullable=False)  # UUID as string
+    description = db.Column(db.Text, nullable=False)
+    date = db.Column(db.Date, nullable=False)
 
-class IncidentSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Incident
-        include_relationships = True
-        load_instance = True
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "agent_id": self.agent_id,
+            "description": self.description,
+            "date": self.date.isoformat()
+        }
