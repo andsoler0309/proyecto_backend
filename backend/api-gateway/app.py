@@ -38,6 +38,7 @@ def create_app():
     api.add_resource(DeleteAgent, '/agents/<string:agent_id>', endpoint='delete_agent', methods=['DELETE'])
     api.add_resource(CreateIncident, '/incidents', endpoint='create_incident', methods=['POST'])
     api.add_resource(DeleteIncident, '/incidents/<string:incident_id>', endpoint='delete_incident', methods=['DELETE'])
+    api.add_resource(Logout, '/agents/logout', endpoint='logout', methods=['POST'])
 
     return app
 

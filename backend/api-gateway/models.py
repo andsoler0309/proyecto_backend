@@ -2,6 +2,7 @@ from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
+from datetime import datetime
 import uuid
 
 
@@ -24,3 +25,15 @@ class Verification(db.Model):
 
     def __repr__(self):
         return f"<Verification {self.verification_id} for Agent {self.agent_id}>"
+
+
+class TokenBlacklist(db.Model):
+    __tablename__ = 'token_blacklist'
+
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(255), unique=True, nullable=False)  # JWT ID
+    token = db.Column(db.Text, nullable=False)
+    blacklisted_on = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<TokenBlacklist {self.jti}>"

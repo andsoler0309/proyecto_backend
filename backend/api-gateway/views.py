@@ -9,7 +9,7 @@ import jwt
 import datetime
 import json
 from functools import wraps
-from utils import generate_jwt
+from utils import generate_jwt, decode_jwt, blacklist_token
 from models import db, Verification, UserRole
 from marshmallow import ValidationError
 from auth import token_required, role_required
@@ -79,7 +79,7 @@ class Login(Resource):
         # Generate security question using OpenAI
         try:
             prompt = (
-                f"Create a security question for the following agent based on their personal data and incidents. be creative on the question\n\n"
+                f"Create a security question in spanish for the following agent based on their personal data and incidents.\n\n"
                 f"Agent Data: {agent_data}\n"
                 f"Incidents: {incidents}\n\n"
                 f"Security Question:"
@@ -179,12 +179,12 @@ class VerifySecurityAnswer(Resource):
         # Verify the answer using OpenAI
         try:
             prompt = (
-                f"Based on the following agent data and incidents, determine if the user's answer is correct for the security question.\n\n"
+                f"Based on the following agent data and incidents, determine if the user's answer is correct for the security question, think like a human responding so ignore some situations like case sensitive, etc.\n\n"
                 f"Security Question: {security_question}\n"
                 f"Agent Data: {agent_data}\n"
                 f"Incidents: {incidents}\n\n"
                 f"User's Answer: {user_answer}\n\n"
-                f"Is this answer correct? Respond with 'Yes' or 'No'."
+                f"Is this answer correct? Respond only with 'Yes' or 'No'."
             )
 
             openai_response = client.chat.completions.create(
@@ -222,6 +222,33 @@ class VerifySecurityAnswer(Resource):
         else:
             current_app.logger.info(f"Incorrect security answer for verification_id: {verification_id}")
             return {"msg": "Incorrect security answer"}, 401
+
+
+class Logout(Resource):
+    @token_required
+    def post(self, current_agent):
+        token = None
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            parts = auth_header.split()
+            if len(parts) == 2 and parts[0].lower() == 'bearer':
+                token = parts[1]
+        if not token:
+            return {"msg": "Token is missing"}, 401
+
+        try:
+            payload = decode_jwt(token)
+            if not payload:
+                return {"msg": "Invalid or expired token"}, 401
+            jti = payload.get('jti')
+            if not jti:
+                return {"msg": "Invalid token"}, 401
+            blacklist_token(jti, token)
+            current_app.logger.info(f"Token {jti} has been blacklisted.")
+            return {"msg": "Successfully logged out"}, 200
+        except Exception as e:
+            current_app.logger.error(f"Error during logout: {e}")
+            return {"msg": "Error during logout"}, 500
 
 
 class CreateAgent(Resource):
@@ -279,6 +306,10 @@ class CreateIncident(Resource):
         # Optionally, verify that the agent_id matches the current_agent's id
         if validated_data['agent_id'] != current_agent['id']:
             return {"msg": "Cannot create incident for another agent"}, 403
+
+        for key, value in validated_data.items():
+            if isinstance(value, datetime.date):
+                validated_data[key] = value.isoformat()
 
         # Forward the incident creation to Incidents service
         try:

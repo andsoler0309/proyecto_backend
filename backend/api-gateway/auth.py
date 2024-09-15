@@ -6,6 +6,8 @@ import jwt
 from config import Config
 import requests
 
+from utils import decode_jwt, is_token_blacklisted
+
 
 def token_required(f):
     @wraps(f)
@@ -20,21 +22,18 @@ def token_required(f):
             return {"msg": "Token is missing"}, 401
 
         try:
-            payload = jwt.decode(token, Config.JWT_SECRET, algorithms=[Config.JWT_ALGORITHM])
-            print(payload)
+            payload = decode_jwt(token)
+            if not payload:
+                return {"msg": "Invalid or expired token"}, 401
+            jti = payload.get('jti')
+            if is_token_blacklisted(jti):
+                return {"msg": "Token has been revoked"}, 401
             agent_id = payload['agent_id']
-
             # Verify agent existence via Gestor-Agente
             response = requests.get(f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5)
             if response.status_code != 200:
                 return {"msg": "Agent not found"}, 401
-
-            print(response.json())
             current_agent = response.json()
-        except jwt.ExpiredSignatureError:
-            return {"msg": "Token has expired"}, 401
-        except jwt.InvalidTokenError:
-            return {"msg": "Invalid token"}, 401
         except Exception as e:
             return {"msg": "Token verification failed"}, 401
 
