@@ -4,6 +4,7 @@ from flask_restful import Resource
 from models import db, Agent, UserRole
 from schemas import AgentSchema
 from sqlalchemy.exc import IntegrityError
+from functools import wraps
 
 
 agent_schema = AgentSchema()
@@ -76,6 +77,9 @@ class AgentLogin(Resource):
 
         if not agent or not agent.check_password(password):
             return {"msg": "Bad username or password"}, 401
+        
+        if agent.is_locked:
+            return {"msg": "Your account is locked. Please contact an administrator."}, 403
 
         return agent_schema.dump(agent), 200
 
@@ -86,6 +90,53 @@ class AgentDetail(Resource):
         if not agent:
             return {"msg": "Agent not found"}, 404
         return agent_schema.dump(agent), 200
+
+
+class AgentLock(Resource):
+    def post(self, agent_id):
+        agent = Agent.query.get(agent_id)
+        if not agent:
+            return {"msg": "Agent not found"}, 404
+
+        if agent.is_locked:
+            return {"msg": "Agent is already locked"}, 400
+
+        agent.is_locked = True
+        db.session.commit()
+        return {"msg": f"Agent {agent_id} has been locked"}, 200
+
+
+class AgentUnlock(Resource):
+    def post(self, agent_id):
+        agent = Agent.query.get(agent_id)
+        if not agent:
+            return {"msg": "Agent not found"}, 404
+
+        if not agent.is_locked:
+            return {"msg": "Agent is not locked"}, 400
+
+        agent.is_locked = False
+        db.session.commit()
+        return {"msg": f"Agent {agent_id} has been unlocked"}, 200
+
+
+class AgentReset(Resource):
+    def post(self, agent_id):
+        agent = Agent.query.get(agent_id)
+        if not agent:
+            return {"msg": "Agent not found"}, 404
+
+        # Reset password to default
+        agent.set_password('1234567890')
+        db.session.commit()
+
+        return {"msg": f"Agent {agent_id} has been reset"}, 200
+
+
+class AdminList(Resource):
+    def get(self):
+        admins = Agent.query.filter_by(role=UserRole.ADMIN).all()
+        return agents_schema.dump(admins), 200
 
 
 class Ping(Resource):

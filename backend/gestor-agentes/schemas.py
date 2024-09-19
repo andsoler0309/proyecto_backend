@@ -1,6 +1,7 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from marshmallow import fields
-from models import Agent
+from marshmallow_enum import EnumField
+from models import Agent, UserRole
 
 
 class AgentSchema(SQLAlchemyAutoSchema):
@@ -13,7 +14,7 @@ class AgentSchema(SQLAlchemyAutoSchema):
     id = fields.String()
     name = fields.String(required=True)
     email = fields.Email(required=True)
-    role = fields.String(required=True)
+    role = EnumField(UserRole, required=True)
     identification = fields.String(required=True)
     phone = fields.String(required=True)
     address = fields.String(required=True)
@@ -21,5 +22,6 @@ class AgentSchema(SQLAlchemyAutoSchema):
     state = fields.String(required=True)
     zip_code = fields.String(required=True)
     country = fields.String(required=True)
+    is_locked = fields.Boolean()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()

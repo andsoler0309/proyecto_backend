@@ -2,7 +2,7 @@
 from flask import Flask
 from flask_restful import Api
 from models import db
-from views import AgentRegistration, AgentLogin, AgentDetail, Ping
+from views import *
 from flask_migrate import Migrate
 from flask_cors import CORS
 import os
@@ -29,7 +29,12 @@ def create_app():
     api.add_resource(AgentRegistration, '/agents/register')
     api.add_resource(AgentLogin, '/agent/login')
     api.add_resource(AgentDetail, '/agents/<string:agent_id>')
+    api.add_resource(AgentLock, '/agents/<string:agent_id>/lock')
+    api.add_resource(AgentUnlock, '/agents/<string:agent_id>/unlock')
+    api.add_resource(AgentReset, '/agents/<string:agent_id>/reset')
     api.add_resource(Ping, '/gestor-agentes/ping')
+    api.add_resource(AdminList, '/agents/admins')
+
 
     return app
 

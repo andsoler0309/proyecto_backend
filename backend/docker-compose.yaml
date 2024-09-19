@@ -88,6 +88,8 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
       - GESTOR_AGENTES_BASE_URL=http://gestor-agentes:5000
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - EMAIL_ADDRESS=${EMAIL_ADDRESS}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
     networks:
       - usuarios-net
       - abcall-net

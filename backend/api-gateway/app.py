@@ -32,13 +32,14 @@ def create_app():
     api.add_resource(Login, '/agents/login', endpoint='login', methods=['POST'])
     api.add_resource(VerifySecurityAnswer, '/agents/verify-security-answer', endpoint='verify_security_answer', methods=['POST'])
     api.add_resource(ProtectedResource, '/protected', endpoint='protected', methods=['GET'])
-    api.add_resource(RoleProtectedResource, '/role-protected', endpoint='role-protected', methods=['GET'])
     api.add_resource(Ping, '/api-gateway/ping', endpoint='ping', methods=['GET'])
     api.add_resource(CreateAgent, '/agents', endpoint='create_agent', methods=['POST'])
     api.add_resource(DeleteAgent, '/agents/<string:agent_id>', endpoint='delete_agent', methods=['DELETE'])
     api.add_resource(CreateIncident, '/incidents', endpoint='create_incident', methods=['POST'])
     api.add_resource(DeleteIncident, '/incidents/<string:incident_id>', endpoint='delete_incident', methods=['DELETE'])
     api.add_resource(Logout, '/agents/logout', endpoint='logout', methods=['POST'])
+    api.add_resource(AdminUnlockAgent, '/admin/agents/<string:agent_id>/unlock', endpoint='admin_unlock_agent', methods=['POST'])
+    api.add_resource(AdminResetAgent, '/admin/agents/<string:agent_id>/reset', endpoint='admin_reset_agent', methods=['POST'])
 
     return app
 

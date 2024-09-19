@@ -11,4 +11,5 @@ class Config:
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY') or 'your_openai_api_key'
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL') or 'sqlite:///api_gateway.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    SESSION_INACTIVITY_LIMIT = 30  # minutes
+    MAX_FAILED_ATTEMPTS = 3

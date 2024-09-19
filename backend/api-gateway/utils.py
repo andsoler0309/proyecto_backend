@@ -1,13 +1,21 @@
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import os
 import jwt
 import datetime
 from config import Config
-from models import db, TokenBlacklist
+from models import db, TokenBlacklist, FailedAttempt, Session
 import uuid
+import ipaddress
+from flask import current_app, request
+import requests
 
 
-def generate_jwt(agent_id):
+def generate_jwt(agent_id, session_id):
     payload = {
         'agent_id': agent_id,
+        'session_id': session_id,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=Config.JWT_EXP_DELTA_SECONDS),
         'iat': datetime.datetime.utcnow(),
         'jti': str(uuid.uuid4())
@@ -35,3 +43,87 @@ def blacklist_token(jti, token):
 def is_token_blacklisted(jti):
     blacklisted = TokenBlacklist.query.filter_by(jti=jti).first()
     return blacklisted is not None
+
+
+def notify_admin(subject, message):
+    # Fetch all admin email addresses via API call
+    try:
+        response = requests.get(
+            f"{Config.GESTOR_AGENTES_BASE_URL}/agents/admins",
+            timeout=5
+        )
+        if response.status_code != 200:
+            current_app.logger.error("Failed to fetch admin email addresses.")
+            return
+        admin_agents = response.json()
+        admin_emails = [admin['email'] for admin in admin_agents]
+    except Exception as e:
+        current_app.logger.error(f"Error fetching admin emails: {e}")
+        return
+
+    if not admin_emails:
+        current_app.logger.warning("No admin email addresses found.")
+        return
+
+    current_app.logger.info(f"Admin Notification - {subject}: {message}")
+    
+    # Email configuration
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    sender_email = os.getenv('EMAIL_ADDRESS')  # Your Gmail address
+    sender_password = os.getenv('EMAIL_PASSWORD')  # Your Gmail App Password
+
+    if not sender_email or not sender_password:
+        current_app.logger.error("Email credentials are not set in environment variables.")
+        return
+
+    # Create the email message
+    msg = MIMEMultipart()
+    msg['From'] = sender_email
+    msg['To'] = ', '.join(admin_emails)
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(message, 'plain'))
+
+    try:
+        # Connect to the Gmail SMTP server and send the email
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, admin_emails, msg.as_string())
+        server.quit()
+        current_app.logger.info(f"Admin Notification Sent - {subject}")
+    except Exception as e:
+        current_app.logger.error(f"Failed to send admin notification email: {e}")
+
+
+def reset_failed_attempts(agent_id):
+    FailedAttempt.query.filter_by(agent_id=agent_id).delete()
+    db.session.commit()
+
+
+def increment_failed_attempts(agent_id):
+    attempt = FailedAttempt.query.filter_by(agent_id=agent_id).first()
+    if attempt:
+        attempt.attempts += 1
+        attempt.last_attempt = datetime.datetime.utcnow()
+    else:
+        attempt = FailedAttempt(agent_id=agent_id, attempts=1)
+        db.session.add(attempt)
+    db.session.commit()
+    return attempt.attempts
+
+
+def lock_agent_account(agent_id):
+    # Send a request to Gestor-Agente to lock the agent account
+    try:
+        response = requests.post(
+            f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/lock",
+            timeout=5
+        )
+        if response.status_code == 200:
+            current_app.logger.info(f"Agent {agent_id} has been locked due to multiple failed attempts.")
+        else:
+            current_app.logger.error(f"Failed to lock agent {agent_id}: {response.text}")
+    except Exception as e:
+        current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")

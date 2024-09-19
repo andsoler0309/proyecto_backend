@@ -36,3 +36,7 @@ class IncidentCreationSchema(Schema):
     agent_id = fields.Str(required=True)
     description = fields.Str(required=True, validate=validate.Length(min=1))
     date = fields.Date(required=True)
+
+
+class AdminActionSchema(Schema):
+    agent_id = fields.Str(required=True)
