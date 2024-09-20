@@ -6,7 +6,7 @@ kind: Ingress
 metadata:
   name: gateway-ingress
   labels:
-    name: gateway-ingress
+    name: gateway-ingress    
 spec:
   rules:
   - http:

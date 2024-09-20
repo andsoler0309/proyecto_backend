@@ -43,6 +43,16 @@ spec:
                   secretKeyRef:
                     name: app-secrets
                     key: OPENAI_API_KEY
+            - name: EMAIL_ADDRESS
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets
+                    key: EMAIL_ADDRESS
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets
+                    key: EMAIL_PASSWORD
           # Realizar pull siempre a la imagen
           imagePullPolicy: Always
 

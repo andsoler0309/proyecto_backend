@@ -7,7 +7,7 @@ from openai import OpenAI
 import uuid
 import datetime
 from utils import generate_jwt, decode_jwt, blacklist_token, reset_failed_attempts, \
-    increment_failed_attempts, lock_agent_account, notify_admin
+    increment_failed_attempts, lock_agent_account, notify_admin, is_new_ip
 from models import db, Verification, UserRole, Session, IPAddressLoginAttempt, AgentIPAddress
 from marshmallow import ValidationError
 from auth import token_required, role_required
@@ -37,7 +37,8 @@ class Login(Resource):
 
         email = validated_data['email']
         password = validated_data['password']
-        client_ip = request.remote_addr
+        x_forwarded_for = request.headers.get('X-Forwarded-For', '')
+        client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else request.remote_addr
         user_agent = request.headers.get('User-Agent')
 
         current_app.logger.info(f"Login attempt for email: {email} from IP: {client_ip}, User-Agent: {user_agent}")
@@ -80,7 +81,6 @@ class Login(Resource):
         if not agent_id:
             return {"msg": "Invalid agent data received"}, 500
 
-        print(agent_data)
         if agent_data.get('is_locked'):
             return {"msg": "Your account is locked due to multiple failed attempts. Please contact an administrator."}, 403
 
@@ -91,7 +91,8 @@ class Login(Resource):
             known_ip.login_count += 1
             db.session.commit()
             is_suspicious = False
-        else:
+
+        if is_new_ip(agent_id, client_ip):
             # New IP address for this agent
             new_ip = AgentIPAddress(
                 agent_id=agent_id,
@@ -128,7 +129,7 @@ class Login(Resource):
         agent_data.pop('is_locked', None)
         try:
             prompt = (
-                f"Create a security question in spanish for the following agent based on their agent data and incidents.\n\n"
+                f"Create a security question in spanish for the following agent ONLY based on their agent data and incidents.\n\n"
                 f"Agent Data: {agent_data}\n"
                 f"Incidents: {incidents}\n\n"
                 f"Security Question:"

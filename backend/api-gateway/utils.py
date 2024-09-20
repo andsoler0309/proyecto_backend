@@ -5,7 +5,7 @@ import os
 import jwt
 import datetime
 from config import Config
-from models import db, TokenBlacklist, FailedAttempt, Session
+from models import db, TokenBlacklist, FailedAttempt, Session, IPAddressLoginAttempt, AgentIPAddress
 import uuid
 import ipaddress
 from flask import current_app, request
@@ -127,3 +127,19 @@ def lock_agent_account(agent_id):
             current_app.logger.error(f"Failed to lock agent {agent_id}: {response.text}")
     except Exception as e:
         current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
+
+
+def is_new_ip(agent_id, client_ip):
+    """
+    Determine if the client_ip is new for the user based on /24 subnet.
+    """
+    client_network = ipaddress.ip_network(f"{client_ip}/24", strict=False)
+
+    # Fetch all known IPs for the user
+    known_ips = db.session.query(AgentIPAddress.ip_address).filter_by(agent_id=agent_id).all()
+
+    for (ip_str,) in known_ips:
+        known_network = ipaddress.ip_network(f"{ip_str}/24", strict=False)
+        if client_network.overlaps(known_network):
+            return False  # IP is within an existing /24 subnet
+    return True
