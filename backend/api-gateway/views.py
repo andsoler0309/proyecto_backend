@@ -129,10 +129,10 @@ class Login(Resource):
         agent_data.pop('is_locked', None)
         try:
             prompt = (
-                f"Create a security question in spanish for the following agent ONLY based on their agent data and incidents.\n\n"
-                f"Agent Data: {agent_data}\n"
-                f"Incidents: {incidents}\n\n"
-                f"Security Question:"
+                f"Crea una pregunta de seguridad para verificar que si sea el agente, esta pregunta hazla basada en la informacion que te paso en este mensaje, solo dame la pregunta de seguridad sin nada mas:\n\n"
+                f"Data agente: {agent_data}\n"
+                f"Incidentes: {incidents}\n\n"
+                f"Pregunta de seguridad:"
             )
 
             openai_response = client.chat.completions.create(
@@ -142,7 +142,7 @@ class Login(Resource):
                         "content": prompt,
                     }
                 ],
-                model="gpt-3.5-turbo",
+                model="gpt-4o",
             )
 
             security_question = openai_response.choices[0].message.content.strip()
