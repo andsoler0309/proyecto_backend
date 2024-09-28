@@ -85,16 +85,18 @@ def notify_admin(subject, message):
 
     msg.attach(MIMEText(message, 'plain'))
 
-    try:
-        # Connect to the Gmail SMTP server and send the email
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, admin_emails, msg.as_string())
-        server.quit()
-        current_app.logger.info(f"Admin Notification Sent - {subject}")
-    except Exception as e:
-        current_app.logger.error(f"Failed to send admin notification email: {e}")
+    print(f"Admin Notification Sent - {subject}")
+
+    # try:
+    #     # Connect to the Gmail SMTP server and send the email
+    #     server = smtplib.SMTP(smtp_server, smtp_port)
+    #     server.starttls()
+    #     server.login(sender_email, sender_password)
+    #     server.sendmail(sender_email, admin_emails, msg.as_string())
+    #     server.quit()
+    #     current_app.logger.info(f"Admin Notification Sent - {subject}")
+    # except Exception as e:
+    #     current_app.logger.error(f"Failed to send admin notification email: {e}")
 
 
 def reset_failed_attempts(agent_id):

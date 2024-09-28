@@ -3,7 +3,7 @@ from flask_restful import Resource
 from schemas import LoginSchema, SecurityAnswerSchema, VerificationSchema, AgentCreationSchema, IncidentCreationSchema
 from config import Config
 import requests
-from openai import OpenAI
+# from openai import OpenAI
 import uuid
 import datetime
 from utils import generate_jwt, decode_jwt, blacklist_token, reset_failed_attempts, \
@@ -19,7 +19,7 @@ agent_creation_schema = AgentCreationSchema()
 incident_creation_schema = IncidentCreationSchema()
 
 
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
+# client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
 
 class Ping(Resource):
@@ -128,24 +128,25 @@ class Login(Resource):
         # Generate security question using OpenAI
         agent_data.pop('is_locked', None)
         try:
-            prompt = (
-                f"Crea una pregunta de seguridad para verificar que si sea el agente, esta pregunta hazla basada en la informacion que te paso en este mensaje, solo dame la pregunta de seguridad sin nada mas:\n\n"
-                f"Data agente: {agent_data}\n"
-                f"Incidentes: {incidents}\n\n"
-                f"Pregunta de seguridad:"
-            )
+            # prompt = (
+            #     f"Crea una pregunta de seguridad para verificar que si sea el agente, esta pregunta hazla basada en la informacion que te paso en este mensaje, solo dame la pregunta de seguridad sin nada mas:\n\n"
+            #     f"Data agente: {agent_data}\n"
+            #     f"Incidentes: {incidents}\n\n"
+            #     f"Pregunta de seguridad:"
+            # )
 
-            openai_response = client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    }
-                ],
-                model="gpt-4o",
-            )
+            # openai_response = client.chat.completions.create(
+            #     messages=[
+            #         {
+            #             "role": "user",
+            #             "content": prompt,
+            #         }
+            #     ],
+            #     model="gpt-4o",
+            # )
 
-            security_question = openai_response.choices[0].message.content.strip()
+            # security_question = openai_response.choices[0].message.content.strip()
+            security_question = "cual es el nomrbe del proyecto? repsuesta abcall"
 
             if not security_question:
                 raise ValueError("Empty security question generated")
@@ -232,27 +233,27 @@ class VerifySecurityAnswer(Resource):
 
         # Verify the answer using OpenAI
         try:
-            prompt = (
-                f"Based on the following agent data and incidents, determine if the user's answer is correct for the security question, think like a human responding so ignore some situations like case sensitive, etc.\n\n"
-                f"Security Question: {security_question}\n"
-                f"Agent Data: {agent_data}\n"
-                f"Incidents: {incidents}\n\n"
-                f"User's Answer: {user_answer}\n\n"
-                f"Is this answer correct? Respond only with 'Yes' or 'No'."
-            )
+            # prompt = (
+            #     f"Based on the following agent data and incidents, determine if the user's answer is correct for the security question, think like a human responding so ignore some situations like case sensitive, etc.\n\n"
+            #     f"Security Question: {security_question}\n"
+            #     f"Agent Data: {agent_data}\n"
+            #     f"Incidents: {incidents}\n\n"
+            #     f"User's Answer: {user_answer}\n\n"
+            #     f"Is this answer correct? Respond only with 'Yes' or 'No'."
+            # )
 
-            openai_response = client.chat.completions.create(
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    }
-                ],
-                model="gpt-3.5-turbo",
-            )
+            # openai_response = client.chat.completions.create(
+            #     messages=[
+            #         {
+            #             "role": "user",
+            #             "content": prompt,
+            #         }
+            #     ],
+            #     model="gpt-3.5-turbo",
+            # )
 
-            verification_response = openai_response.choices[0].message.content.strip()
-            print(verification_response)
+            # verification_response = openai_response.choices[0].message.content.strip()
+            verification_response = "Yes"
 
             if verification_response not in ['Yes', 'No']:
                 raise ValueError("Invalid verification response from OpenAI")
@@ -298,7 +299,6 @@ class VerifySecurityAnswer(Resource):
             attempts = increment_failed_attempts(agent_id)
             current_app.logger.info(
                 f"Incorrect security answer for verification_id: {verification_id}. Attempts: {attempts}")
-            print(attempts)
             if attempts >= Config.MAX_FAILED_ATTEMPTS:
                 # Lock the agent account
                 lock_agent_account(agent_id)

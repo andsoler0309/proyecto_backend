@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask
 from flask_restful import Api
 from views import *
@@ -31,7 +30,6 @@ def create_app():
     # Register API resources
     api.add_resource(Login, '/agents/login', endpoint='login', methods=['POST'])
     api.add_resource(VerifySecurityAnswer, '/agents/verify-security-answer', endpoint='verify_security_answer', methods=['POST'])
-    api.add_resource(ProtectedResource, '/protected', endpoint='protected', methods=['GET'])
     api.add_resource(Ping, '/api-gateway/ping', endpoint='ping', methods=['GET'])
     api.add_resource(CreateAgent, '/agents', endpoint='create_agent', methods=['POST'])
     api.add_resource(DeleteAgent, '/agents/<string:agent_id>', endpoint='delete_agent', methods=['DELETE'])
