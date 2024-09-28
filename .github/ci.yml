@@ -1,0 +1,93 @@
+name: CI para Microservicios Flask
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - generacion-reportes
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependencias
+        run: |
+          cd ${{ matrix.service }}
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install black isort autoflake
+
+      - name: Formatear código con Black
+        run: |
+          cd ${{ matrix.service }}
+          source venv/bin/activate
+          black .
+
+      - name: Ordenar importaciones con isort
+        run: |
+          cd ${{ matrix.service }}
+          source venv/bin/activate
+          isort .
+
+      - name: Eliminar importaciones no utilizadas con autoflake
+        run: |
+          cd ${{ matrix.service }}
+          source venv/bin/activate
+          autoflake --remove-all-unused-imports --recursive --in-place .
+
+      - name: Configurar Git para Commits Automáticos
+        if: github.event_name == 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Verificar y Push de Cambios Automatizados
+        if: github.event_name == 'pull_request'
+        run: |
+          cd ${{ matrix.service }}
+          if [[ `git status --porcelain` ]]; then
+            git add .
+            git commit -m "Auto-fix code formatting and style [ci auto-fix]"
+            git push
+          fi
+
+      - name: Instalar dependencias para pruebas
+        run: |
+          cd ${{ matrix.service }}
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Ejecutar pruebas
+        run: |
+          cd ${{ matrix.service }}
+          source venv/bin/activate
+          pytest tests/
+
+      - name: Subir artefactos de pruebas
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: resultados-pruebas-${{ matrix.service }}
+          path: ${{ matrix.service }}/tests/results.xml

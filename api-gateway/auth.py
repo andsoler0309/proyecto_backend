@@ -75,10 +75,8 @@ def role_required(required_roles):
                 return {"msg": "Token is missing"}, 401
 
             try:
-                payload = jwt.decode(token, Config.JWT_SECRET, algorithms=[Config.JWT_ALGORITHM])
+                payload = decode_jwt(token)
                 agent_id = payload['agent_id']
-
-                print(agent_id)
 
                 # Verify agent existence via Gestor-Agente
                 response = requests.get(f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5)
