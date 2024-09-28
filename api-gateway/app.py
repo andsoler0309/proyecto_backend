@@ -24,7 +24,6 @@ def create_app():
     # migrate = Migrate(app, db)
 
     cors = CORS(app, resources={r"/*": {"origins": "*"}})
-
     api = Api(app)
 
     # Register API resources
