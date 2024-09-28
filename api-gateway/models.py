@@ -1,10 +1,8 @@
-from marshmallow import fields
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from flask_sqlalchemy import SQLAlchemy
-from enum import Enum
-from datetime import datetime
 import uuid
+from datetime import datetime
+from enum import Enum
 
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -16,9 +14,15 @@ class UserRole(Enum):
 
 
 class Verification(db.Model):
-    __tablename__ = 'verifications'
+    __tablename__ = "verifications"
 
-    verification_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    verification_id = db.Column(
+        db.String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+        unique=True,
+        nullable=False,
+    )
     agent_id = db.Column(db.String(36), nullable=False)
     security_question = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
@@ -28,7 +32,7 @@ class Verification(db.Model):
 
 
 class TokenBlacklist(db.Model):
-    __tablename__ = 'token_blacklist'
+    __tablename__ = "token_blacklist"
 
     id = db.Column(db.Integer, primary_key=True)
     jti = db.Column(db.String(255), unique=True, nullable=False)  # JWT ID
@@ -40,9 +44,15 @@ class TokenBlacklist(db.Model):
 
 
 class Session(db.Model):
-    __tablename__ = 'sessions'
+    __tablename__ = "sessions"
 
-    session_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    session_id = db.Column(
+        db.String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+        unique=True,
+        nullable=False,
+    )
     agent_id = db.Column(db.String(36), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     last_activity = db.Column(db.DateTime, nullable=False)
@@ -54,7 +64,7 @@ class Session(db.Model):
 
 
 class FailedAttempt(db.Model):
-    __tablename__ = 'failed_attempts'
+    __tablename__ = "failed_attempts"
 
     id = db.Column(db.Integer, primary_key=True)
     agent_id = db.Column(db.String(36), nullable=False)
@@ -66,7 +76,7 @@ class FailedAttempt(db.Model):
 
 
 class AgentIPAddress(db.Model):
-    __tablename__ = 'agent_ip_addresses'
+    __tablename__ = "agent_ip_addresses"
 
     id = db.Column(db.Integer, primary_key=True)
     agent_id = db.Column(db.String(36), nullable=False)
@@ -76,7 +86,7 @@ class AgentIPAddress(db.Model):
     login_count = db.Column(db.Integer, default=1)
 
     __table_args__ = (
-        db.UniqueConstraint('agent_id', 'ip_address', name='unique_agent_ip'),
+        db.UniqueConstraint("agent_id", "ip_address", name="unique_agent_ip"),
     )
 
     def __repr__(self):
@@ -84,7 +94,7 @@ class AgentIPAddress(db.Model):
 
 
 class IPAddressLoginAttempt(db.Model):
-    __tablename__ = 'ip_address_login_attempts'
+    __tablename__ = "ip_address_login_attempts"
 
     id = db.Column(db.Integer, primary_key=True)
     ip_address = db.Column(db.String(45), nullable=False, unique=True)

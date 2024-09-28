@@ -1,16 +1,21 @@
-from flask import request, current_app
-from flask_restful import Resource
-from schemas import LoginSchema, SecurityAnswerSchema, VerificationSchema, AgentCreationSchema, IncidentCreationSchema
-from config import Config
-import requests
+import datetime
 # from openai import OpenAI
 import uuid
-import datetime
-from utils import generate_jwt, decode_jwt, blacklist_token, reset_failed_attempts, \
-    increment_failed_attempts, lock_agent_account, notify_admin, is_new_ip
-from models import db, Verification, UserRole, Session, IPAddressLoginAttempt, AgentIPAddress
+
+import requests
+from flask import current_app, request
+from flask_restful import Resource
 from marshmallow import ValidationError
-from auth import token_required, role_required
+
+from auth import role_required, token_required
+from config import Config
+from models import (AgentIPAddress, IPAddressLoginAttempt, Session, UserRole,
+                    Verification, db)
+from schemas import (AgentCreationSchema, IncidentCreationSchema, LoginSchema,
+                     SecurityAnswerSchema, VerificationSchema)
+from utils import (blacklist_token, decode_jwt, generate_jwt,
+                   increment_failed_attempts, is_new_ip, lock_agent_account,
+                   notify_admin, reset_failed_attempts)
 
 login_schema = LoginSchema()
 security_answer_schema = SecurityAnswerSchema()
@@ -35,13 +40,19 @@ class Login(Resource):
         except ValidationError as err:
             return {"msg": "Invalid data", "errors": err.messages}, 400
 
-        email = validated_data['email']
-        password = validated_data['password']
-        x_forwarded_for = request.headers.get('X-Forwarded-For', '')
-        client_ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else request.remote_addr
-        user_agent = request.headers.get('User-Agent')
+        email = validated_data["email"]
+        password = validated_data["password"]
+        x_forwarded_for = request.headers.get("X-Forwarded-For", "")
+        client_ip = (
+            x_forwarded_for.split(",")[0].strip()
+            if x_forwarded_for
+            else request.remote_addr
+        )
+        user_agent = request.headers.get("User-Agent")
 
-        current_app.logger.info(f"Login attempt for email: {email} from IP: {client_ip}, User-Agent: {user_agent}")
+        current_app.logger.info(
+            f"Login attempt for email: {email} from IP: {client_ip}, User-Agent: {user_agent}"
+        )
 
         # Increment IP address login attempt count
         ip_attempt = IPAddressLoginAttempt.query.filter_by(ip_address=client_ip).first()
@@ -52,7 +63,7 @@ class Login(Resource):
             ip_attempt = IPAddressLoginAttempt(
                 ip_address=client_ip,
                 attempts=1,
-                last_attempt=datetime.datetime.utcnow()
+                last_attempt=datetime.datetime.utcnow(),
             )
             db.session.add(ip_attempt)
         db.session.commit()
@@ -63,28 +74,34 @@ class Login(Resource):
             gestor_response = requests.post(
                 f"{Config.GESTOR_AGENTES_BASE_URL}/agent/login",
                 json={"email": email, "password": password},
-                timeout=5
+                timeout=5,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
             return {"msg": "Error communicating with Gestor-Agente"}, 503
 
         if gestor_response.status_code == 403:
-            return {"msg": "Your account is locked due to multiple failed attempts. Please contact an administrator."}, 403
+            return {
+                "msg": "Your account is locked due to multiple failed attempts. Please contact an administrator."
+            }, 403
 
         if gestor_response.status_code != 200:
             return {"msg": "Bad username or password"}, 401
 
         agent_data = gestor_response.json()
-        agent_id = agent_data.get('id')
+        agent_id = agent_data.get("id")
 
         if not agent_id:
             return {"msg": "Invalid agent data received"}, 500
 
-        if agent_data.get('is_locked'):
-            return {"msg": "Your account is locked due to multiple failed attempts. Please contact an administrator."}, 403
+        if agent_data.get("is_locked"):
+            return {
+                "msg": "Your account is locked due to multiple failed attempts. Please contact an administrator."
+            }, 403
 
-        known_ip = AgentIPAddress.query.filter_by(agent_id=agent_id, ip_address=client_ip).first()
+        known_ip = AgentIPAddress.query.filter_by(
+            agent_id=agent_id, ip_address=client_ip
+        ).first()
         if known_ip:
             # Update last used and increment login count
             known_ip.last_used = datetime.datetime.utcnow()
@@ -99,26 +116,30 @@ class Login(Resource):
                 ip_address=client_ip,
                 first_used=datetime.datetime.utcnow(),
                 last_used=datetime.datetime.utcnow(),
-                login_count=1
+                login_count=1,
             )
             db.session.add(new_ip)
             db.session.commit()
             is_suspicious = True
-            current_app.logger.warning(f"Suspicious login attempt for agent_id: {agent_id} from new IP: {client_ip}")
+            current_app.logger.warning(
+                f"Suspicious login attempt for agent_id: {agent_id} from new IP: {client_ip}"
+            )
 
             notify_admin(
                 subject="Suspicious Login Attempt",
-                message=f"Agent {agent_id} attempted to login from a new IP address: {client_ip}"
+                message=f"Agent {agent_id} attempted to login from a new IP address: {client_ip}",
             )
 
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents",
                 params={"agent_id": agent_id},
-                timeout=5
+                timeout=5,
             )
             if incidents_response.status_code != 200:
-                current_app.logger.error(f"Error fetching incidents: {incidents_response.text}")
+                current_app.logger.error(
+                    f"Error fetching incidents: {incidents_response.text}"
+                )
                 return {"msg": "Error fetching incidents"}, 500
             incidents = incidents_response.json()
         except requests.exceptions.RequestException as e:
@@ -126,7 +147,7 @@ class Login(Resource):
             return {"msg": "Error communicating with Incidents Service"}, 503
 
         # Generate security question using OpenAI
-        agent_data.pop('is_locked', None)
+        agent_data.pop("is_locked", None)
         try:
             # prompt = (
             #     f"Crea una pregunta de seguridad para verificar que si sea el agente, esta pregunta hazla basada en la informacion que te paso en este mensaje, solo dame la pregunta de seguridad sin nada mas:\n\n"
@@ -159,7 +180,7 @@ class Login(Resource):
         verification = Verification(
             verification_id=verification_id,
             agent_id=agent_id,
-            security_question=security_question
+            security_question=security_question,
         )
         db.session.add(verification)
         try:
@@ -169,11 +190,13 @@ class Login(Resource):
             current_app.logger.error(f"Error storing verification data: {e}")
             return {"msg": "Internal server error"}, 500
 
-        current_app.logger.info(f"Generated security question for agent_id: {agent_id}, verification_id: {verification_id}")
+        current_app.logger.info(
+            f"Generated security question for agent_id: {agent_id}, verification_id: {verification_id}"
+        )
 
         return {
             "verification_id": verification_id,
-            "security_question": security_question
+            "security_question": security_question,
         }, 200
 
 
@@ -185,13 +208,17 @@ class VerifySecurityAnswer(Resource):
         except ValidationError as err:
             return {"msg": "Invalid data", "errors": err.messages}, 400
 
-        verification_id = validated_data['verification_id']
-        user_answer = validated_data['answer']
+        verification_id = validated_data["verification_id"]
+        user_answer = validated_data["answer"]
 
-        current_app.logger.info(f"Security answer verification attempt for verification_id: {verification_id}")
+        current_app.logger.info(
+            f"Security answer verification attempt for verification_id: {verification_id}"
+        )
 
         # Retrieve verification details from the database
-        verification = Verification.query.filter_by(verification_id=verification_id).first()
+        verification = Verification.query.filter_by(
+            verification_id=verification_id
+        ).first()
         if not verification:
             return {"msg": "Invalid or expired verification ID"}, 400
 
@@ -201,8 +228,7 @@ class VerifySecurityAnswer(Resource):
         # Fetch agent data from Gestor-Agente
         try:
             gestor_response = requests.get(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}",
-                timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5
             )
             if gestor_response.status_code != 200:
                 current_app.logger.error(f"Agent not found: {agent_id}")
@@ -213,18 +239,22 @@ class VerifySecurityAnswer(Resource):
             return {"msg": "Error communicating with Gestor-Agente"}, 503
 
         # Check if agent account is locked
-        if agent_data.get('is_locked'):
-            return {"msg": "Your account is locked due to multiple failed attempts. Please contact an administrator."}, 403
+        if agent_data.get("is_locked"):
+            return {
+                "msg": "Your account is locked due to multiple failed attempts. Please contact an administrator."
+            }, 403
 
         # Fetch incidents from Incidents Service
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents",
                 params={"agent_id": agent_id},
-                timeout=5
+                timeout=5,
             )
             if incidents_response.status_code != 200:
-                current_app.logger.error(f"Error fetching incidents: {incidents_response.text}")
+                current_app.logger.error(
+                    f"Error fetching incidents: {incidents_response.text}"
+                )
                 return {"msg": "Error fetching incidents"}, 500
             incidents = incidents_response.json()
         except requests.exceptions.RequestException as e:
@@ -255,10 +285,12 @@ class VerifySecurityAnswer(Resource):
             # verification_response = openai_response.choices[0].message.content.strip()
             verification_response = "Yes"
 
-            if verification_response not in ['Yes', 'No']:
+            if verification_response not in ["Yes", "No"]:
                 raise ValueError("Invalid verification response from OpenAI")
         except Exception as e:
-            current_app.logger.error(f"Error verifying security answer with OpenAI: {e}")
+            current_app.logger.error(
+                f"Error verifying security answer with OpenAI: {e}"
+            )
             return {"msg": "Error verifying security answer"}, 500
 
         # Remove the verification entry from the database
@@ -269,7 +301,7 @@ class VerifySecurityAnswer(Resource):
             db.session.rollback()
             current_app.logger.error(f"Error deleting verification data: {e}")
 
-        if verification_response == 'Yes':
+        if verification_response == "Yes":
             reset_failed_attempts(agent_id)
 
             # Create a new session
@@ -279,7 +311,7 @@ class VerifySecurityAnswer(Resource):
                 agent_id=agent_id,
                 last_activity=datetime.datetime.utcnow(),
                 ip_address=request.remote_addr,
-                user_agent=request.headers.get('User-Agent')
+                user_agent=request.headers.get("User-Agent"),
             )
             db.session.add(new_session)
             try:
@@ -291,23 +323,31 @@ class VerifySecurityAnswer(Resource):
 
             # Generate JWT token including session_id
             token = generate_jwt(agent_id, session_id)
-            current_app.logger.info(f"Login successful for agent_id: {agent_id}, token issued.")
+            current_app.logger.info(
+                f"Login successful for agent_id: {agent_id}, token issued."
+            )
 
-            return {"msg": "Login successful", "token": token, "agent_id": agent_id}, 200
+            return {
+                "msg": "Login successful",
+                "token": token,
+                "agent_id": agent_id,
+            }, 200
         else:
             # Increment failed attempts
             attempts = increment_failed_attempts(agent_id)
             current_app.logger.info(
-                f"Incorrect security answer for verification_id: {verification_id}. Attempts: {attempts}")
+                f"Incorrect security answer for verification_id: {verification_id}. Attempts: {attempts}"
+            )
             if attempts >= Config.MAX_FAILED_ATTEMPTS:
                 # Lock the agent account
                 lock_agent_account(agent_id)
                 notify_admin(
                     subject="Agent Account Locked",
-                    message=f"Agent {agent_id} has been locked due to multiple failed security answers."
+                    message=f"Agent {agent_id} has been locked due to multiple failed security answers.",
                 )
                 return {
-                    "msg": "Your account has been locked due to multiple failed attempts. Please contact an administrator."}, 403
+                    "msg": "Your account has been locked due to multiple failed attempts. Please contact an administrator."
+                }, 403
 
             return {"msg": "Incorrect security answer"}, 401
 
@@ -316,10 +356,10 @@ class Logout(Resource):
     @token_required
     def post(self, current_agent):
         token = None
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
+        if "Authorization" in request.headers:
+            auth_header = request.headers["Authorization"]
             parts = auth_header.split()
-            if len(parts) == 2 and parts[0].lower() == 'bearer':
+            if len(parts) == 2 and parts[0].lower() == "bearer":
                 token = parts[1]
         if not token:
             return {"msg": "Token is missing"}, 401
@@ -328,8 +368,8 @@ class Logout(Resource):
             payload = decode_jwt(token)
             if not payload:
                 return {"msg": "Invalid or expired token"}, 401
-            jti = payload.get('jti')
-            session_id = payload.get('session_id')
+            jti = payload.get("jti")
+            session_id = payload.get("session_id")
             if not jti:
                 return {"msg": "Invalid token"}, 401
 
@@ -361,7 +401,7 @@ class CreateAgent(Resource):
             gestor_response = requests.post(
                 f"{Config.GESTOR_AGENTES_BASE_URL}/agents/register",
                 json=validated_data,
-                timeout=5
+                timeout=5,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
@@ -378,8 +418,7 @@ class DeleteAgent(Resource):
         # Forward the agent deletion to Gestor-Agente service
         try:
             gestor_response = requests.delete(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}",
-                timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
@@ -400,7 +439,7 @@ class CreateIncident(Resource):
         except ValidationError as err:
             return {"msg": "Invalid data", "errors": err.messages}, 400
 
-        if validated_data['agent_id'] != current_agent['id']:
+        if validated_data["agent_id"] != current_agent["id"]:
             return {"msg": "Cannot create incident for another agent"}, 403
 
         for key, value in validated_data.items():
@@ -412,7 +451,7 @@ class CreateIncident(Resource):
             incidents_response = requests.post(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents",
                 json=validated_data,
-                timeout=5
+                timeout=5,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
@@ -430,7 +469,7 @@ class DeleteIncident(Resource):
         try:
             incident_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5
+                timeout=5,
             )
             if incident_response.status_code != 200:
                 return incident_response.json(), incident_response.status_code
@@ -439,14 +478,17 @@ class DeleteIncident(Resource):
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
 
-        if incident['agent_id'] != current_agent['id'] and current_agent['role'] != 'admin':
+        if (
+            incident["agent_id"] != current_agent["id"]
+            and current_agent["role"] != "admin"
+        ):
             return {"msg": "Unauthorized to delete this incident"}, 403
 
         # Forward the incident deletion to Incidents service
         try:
             delete_response = requests.delete(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5
+                timeout=5,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
@@ -471,8 +513,7 @@ class AdminUnlockAgent(Resource):
         # Unlock the agent account via Gestor-Agente
         try:
             response = requests.post(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock",
-                timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock", timeout=5
             )
             if response.status_code == 200:
                 # Reset failed attempts
@@ -491,8 +532,7 @@ class AdminResetAgent(Resource):
         # Reset agent data via Gestor-Agente
         try:
             response = requests.post(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/reset",
-                timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/reset", timeout=5
             )
             if response.status_code == 200:
                 return {"msg": f"Agent {agent_id} has been reset"}, 200

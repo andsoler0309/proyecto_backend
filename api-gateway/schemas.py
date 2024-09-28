@@ -21,7 +21,9 @@ class VerificationSchema(Schema):
 class AgentCreationSchema(Schema):
     name = fields.Str(required=True, validate=validate.Length(min=1))
     email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True, validate=validate.Length(min=6))
+    password = fields.Str(
+        required=True, load_only=True, validate=validate.Length(min=6)
+    )
     role = fields.Str(required=True, validate=validate.OneOf(["agent", "admin"]))
     identification = fields.Str(required=True)
     phone = fields.Str(required=True)
