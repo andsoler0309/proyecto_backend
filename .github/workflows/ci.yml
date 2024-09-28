@@ -3,12 +3,12 @@ name: CI para Microservicios Flask
 on:
   push:
     branches:
-      - main
+      - develop
     paths-ignore:
       - '**/*'
   pull_request:
     branches:
-      - main
+      - develop
 
 permissions:
   contents: write  # Permiso necesario para hacer push
