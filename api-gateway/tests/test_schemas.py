@@ -1,16 +1,17 @@
-from schemas import LoginSchema, SecurityAnswerSchema, AgentCreationSchema, IncidentCreationSchema
-from marshmallow import ValidationError
 import pytest
+from marshmallow import ValidationError
+
+from schemas import (AgentCreationSchema, LoginSchema)
 
 
 def test_login_schema():
-    data = {'email': 'test@example.com', 'password': 'password'}
+    data = {"email": "test@example.com", "password": "password"}
     result = LoginSchema().load(data)
-    assert result['email'] == 'test@example.com'
+    assert result["email"] == "test@example.com"
 
 
 def test_login_schema_invalid():
-    data = {'email': 'invalid-email', 'password': 'password'}
+    data = {"email": "invalid-email", "password": "password"}
     with pytest.raises(ValidationError):
         LoginSchema().load(data)
 
@@ -27,10 +28,10 @@ def test_agent_creation_schema():
         "city": "Testville",
         "state": "Test State",
         "zip_code": "12345",
-        "country": "Testland"
+        "country": "Testland",
     }
     result = AgentCreationSchema().load(data)
-    assert result['name'] == 'Test Agent'
+    assert result["name"] == "Test Agent"
 
 
 def test_agent_creation_schema_invalid_role():
@@ -45,7 +46,7 @@ def test_agent_creation_schema_invalid_role():
         "city": "Testville",
         "state": "Test State",
         "zip_code": "12345",
-        "country": "Testland"
+        "country": "Testland",
     }
     with pytest.raises(ValidationError):
         AgentCreationSchema().load(data)

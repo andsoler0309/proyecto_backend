@@ -10,6 +10,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write  # Permiso necesario para hacer push
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -17,13 +20,13 @@ jobs:
       matrix:
         service:
           - api-gateway
-          - generacion-reportes
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
         with:
           persist-credentials: true
           fetch-depth: 0
+          ref: ${{ github.head_ref }}  # Asegura checkout en la rama del PR
 
       - name: Configurar Python
         uses: actions/setup-python@v4
@@ -70,7 +73,7 @@ jobs:
           if [[ `git status --porcelain` ]]; then
             git add .
             git commit -m "Auto-fix code formatting and style [ci auto-fix]"
-            git push
+            git push origin HEAD:${{ github.head_ref }}
           fi
 
       - name: Instalar dependencias para pruebas

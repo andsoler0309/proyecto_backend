@@ -1,11 +1,12 @@
-
 def test_app_creation(app):
     assert app is not None
-    assert app.config['TESTING'] == True
+    assert app.config["TESTING"] == True
 
 
 def test_models_import():
-    from models import Verification, TokenBlacklist, Session, FailedAttempt, AgentIPAddress, IPAddressLoginAttempt
+    from models import (AgentIPAddress, FailedAttempt, IPAddressLoginAttempt,
+                        Session, TokenBlacklist, Verification)
+
     assert Verification is not None
     assert TokenBlacklist is not None
     assert Session is not None
