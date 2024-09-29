@@ -2,7 +2,6 @@ from flask import Flask
 from flask_restful import Api
 from models import db, Plan
 from views import *
-from flask_migrate import Migrate
 from flask_cors import CORS
 import os
 
