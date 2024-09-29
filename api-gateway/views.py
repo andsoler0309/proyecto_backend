@@ -500,13 +500,6 @@ class DeleteIncident(Resource):
         return {"msg": "Incident deleted successfully"}, 200
 
 
-class ProtectedResource(Resource):
-    @token_required
-    def get(self, current_agent):
-        print(current_agent)
-        return {"msg": f"Hello, {current_agent.get('name')}"}, 200
-
-
 class AdminUnlockAgent(Resource):
     @role_required([UserRole.ADMIN.name])
     def post(self, current_agent, agent_id):

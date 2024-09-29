@@ -1,7 +1,7 @@
 import pytest
 from marshmallow import ValidationError
 
-from schemas import (AgentCreationSchema, LoginSchema)
+from schemas import AgentCreationSchema, LoginSchema
 
 
 def test_login_schema():
