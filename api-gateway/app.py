@@ -4,7 +4,7 @@ from flask_restful import Api
 
 from config import Config
 from models import db
-from services import *
+from services.incidents import *
 from views import *
 
 
