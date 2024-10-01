@@ -11,6 +11,10 @@ on:
       - reopened
       - unlocked
     branches: [develop]
+
+permissions:
+  contents: write
+
 jobs:
   job1:
     name: formatting
