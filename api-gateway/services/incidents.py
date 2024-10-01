@@ -1,13 +1,16 @@
 import datetime
+
 import requests
 from flask import current_app, request
 from flask_restful import Resource
 from marshmallow import ValidationError
-from auth import role_required, token_required
+
+from auth import token_required
 from config import Config
 from schemas import IncidentCreationSchema
 
 incident_creation_schema = IncidentCreationSchema()
+
 
 class CreateIncident(Resource):
     @token_required
@@ -125,7 +128,7 @@ class UpdateIncident(Resource):
             return update_response.json(), update_response.status_code
 
         return update_response.json(), 200
-    
+
 
 class GetIncidentDetail(Resource):
     @token_required
@@ -149,7 +152,7 @@ class GetIncidentDetail(Resource):
             return {"msg": "Unauthorized to view this incident"}, 403
 
         return incident, 200
-    
+
 
 class GetIncidentsByUser(Resource):
     @token_required
@@ -174,7 +177,7 @@ class GetIncidentsByUser(Resource):
             return {"msg": "Unauthorized to view these incidents"}, 403
 
         return incidents, 200
-    
+
 
 class GetIncidentsByAgent(Resource):
     @token_required
