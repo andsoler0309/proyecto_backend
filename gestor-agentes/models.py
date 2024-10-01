@@ -15,9 +15,15 @@ class UserRole(Enum):
 
 
 class Agent(db.Model):
-    __tablename__ = 'agents'
+    __tablename__ = "agents"
 
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False)
+    id = db.Column(
+        db.String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+        unique=True,
+        nullable=False,
+    )
     name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -31,7 +37,9 @@ class Agent(db.Model):
     country = db.Column(db.String(255), nullable=False)
     is_locked = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-    updated_at = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+    updated_at = db.Column(
+        db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now()
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

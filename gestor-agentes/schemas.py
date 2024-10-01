@@ -9,7 +9,7 @@ class AgentSchema(SQLAlchemyAutoSchema):
         model = Agent
         include_relationships = True
         load_instance = True
-        exclude = ("password_hash", )
+        exclude = ("password_hash",)
 
     id = fields.String()
     name = fields.String(required=True)

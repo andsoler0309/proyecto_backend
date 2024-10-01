@@ -15,17 +15,17 @@ class AgentRegistration(Resource):
     def post(self):
         data = request.get_json()
         try:
-            name = data['name']
-            email = data['email']
-            password = data['password']
-            role = data['role']
-            identification = data['identification']
-            phone = data['phone']
-            address = data['address']
-            city = data['city']
-            state = data['state']
-            zip_code = data['zip_code']
-            country = data['country']
+            name = data["name"]
+            email = data["email"]
+            password = data["password"]
+            role = data["role"]
+            identification = data["identification"]
+            phone = data["phone"]
+            address = data["address"]
+            city = data["city"]
+            state = data["state"]
+            zip_code = data["zip_code"]
+            country = data["country"]
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
 
@@ -50,7 +50,7 @@ class AgentRegistration(Resource):
             city=city,
             state=state,
             zip_code=zip_code,
-            country=country
+            country=country,
         )
         agent.set_password(password)
 
@@ -67,8 +67,8 @@ class AgentRegistration(Resource):
 class AgentLogin(Resource):
     def post(self):
         data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
 
         if not email or not password:
             return {"msg": "Email and password are required"}, 400
@@ -77,9 +77,11 @@ class AgentLogin(Resource):
 
         if not agent or not agent.check_password(password):
             return {"msg": "Bad username or password"}, 401
-        
+
         if agent.is_locked:
-            return {"msg": "Your account is locked. Please contact an administrator."}, 403
+            return {
+                "msg": "Your account is locked. Please contact an administrator."
+            }, 403
 
         return agent_schema.dump(agent), 200
 
@@ -127,7 +129,7 @@ class AgentReset(Resource):
             return {"msg": "Agent not found"}, 404
 
         # Reset password to default
-        agent.set_password('1234567890')
+        agent.set_password("1234567890")
         db.session.commit()
 
         return {"msg": f"Agent {agent_id} has been reset"}, 200

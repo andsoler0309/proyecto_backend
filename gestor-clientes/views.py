@@ -8,26 +8,23 @@ from schemas import ClientSchema, PlanSchema
 client_schema = ClientSchema()
 plan_schema = PlanSchema()
 
+
 class ClientRegistration(Resource):
     def post(self):
         data = request.get_json()
         try:
-            name = data['name']
-            email = data['email']
-            password = data['password']
-            company_name = data['company_name']
- 
+            name = data["name"]
+            email = data["email"]
+            password = data["password"]
+            company_name = data["company_name"]
+
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
 
         if Client.query.filter_by(email=email).first():
             return {"msg": "Email already exists"}, 400
 
-        client = Client(
-            name=name,
-            email=email,
-            company_name=company_name
-        )
+        client = Client(name=name, email=email, company_name=company_name)
         client.set_password(password)
 
         db.session.add(client)
@@ -43,8 +40,8 @@ class ClientRegistration(Resource):
 class ClientLogin(Resource):
     def post(self):
         data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
 
         if not email or not password:
             return {"msg": "Email and password are required"}, 400
@@ -55,24 +52,22 @@ class ClientLogin(Resource):
             return {"msg": "Bad username or password"}, 401
 
         return client_schema.dump(client), 200
-    
+
+
 class Plans(Resource):
-    def get(self): 
+    def get(self):
         plans = Plan.query.all()
         return plan_schema.dump(plans, many=True), 200
-    
+
     def post(self):
         data = request.get_json()
         try:
-            nombre = data['nombre']
-            descripcion = data['descripcion']
+            nombre = data["nombre"]
+            descripcion = data["descripcion"]
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
 
-        plan = Plan(
-            nombre=nombre,
-            descripcion=descripcion
-        )
+        plan = Plan(nombre=nombre, descripcion=descripcion)
 
         db.session.add(plan)
         try:
@@ -98,8 +93,8 @@ class PlanDetail(Resource):
 
         data = request.get_json()
         try:
-            plan.nombre = data['nombre']
-            plan.descripcion = data['descripcion']
+            plan.nombre = data["nombre"]
+            plan.descripcion = data["descripcion"]
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
 
@@ -121,20 +116,20 @@ class PlanDetail(Resource):
         db.session.commit()
 
         return {"msg": "Plan deleted"}, 200
-    
+
 
 class GetClientPlan(Resource):
     def get(self, client_id):
         client = Client.query.get(client_id)
         if not client:
             return {"msg": "Client not found"}, 404
-        
+
         plan = Plan.query.get(client.plan_id)
         if not plan:
             return {"msg": "Plan not found"}, 404
 
         return plan_schema.dump(plan), 200
-    
+
 
 class UpdateClientPlan(Resource):
     def put(self, client_id):
@@ -144,7 +139,7 @@ class UpdateClientPlan(Resource):
 
         data = request.get_json()
         try:
-            plan_id = data['plan_id']
+            plan_id = data["plan_id"]
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
 
@@ -157,7 +152,7 @@ class UpdateClientPlan(Resource):
         db.session.commit()
 
         return client_schema.dump(client), 200
-    
+
 
 class DeleteClientPlan(Resource):
     def delete(self, client_id):
@@ -170,7 +165,7 @@ class DeleteClientPlan(Resource):
         db.session.commit()
 
         return client_schema.dump(client), 200
-    
+
 
 class SelectClientPlan(Resource):
     def post(self, client_id, plan_id):
@@ -189,9 +184,6 @@ class SelectClientPlan(Resource):
         return client_schema.dump(client), 200
 
 
-
 class Ping(Resource):
     def get(self):
-        return {
-            "status": "healthy"
-        }, 200
+        return {"status": "healthy"}, 200

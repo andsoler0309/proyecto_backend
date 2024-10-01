@@ -11,7 +11,7 @@ incidents_schema = IncidentSchema(many=True)
 
 class IncidentList(Resource):
     def get(self):
-        agent_id = request.args.get('agent_id')
+        agent_id = request.args.get("agent_id")
         if agent_id:
             incidents = Incident.query.filter_by(agent_id=agent_id).all()
         else:
@@ -24,24 +24,24 @@ class IncidentList(Resource):
             incident_data = incident_schema.load(data)
         except Exception as e:
             return {"msg": "Invalid data", "error": str(e)}, 400
-        
-        registration_medium = incident_data['registration_medium']
+
+        registration_medium = incident_data["registration_medium"]
         try:
             registration_medium_enum = RegistrationMediumEnum(registration_medium)
         except ValueError:
             return {"msg": "Invalid registration medium"}, 400
-        
-        agent_id = incident_data['agent_id']
+
+        agent_id = incident_data["agent_id"]
         if not agent_id:
             return {"msg": "Agent ID is required"}, 400
 
         incident = Incident(
-            description=incident_data['description'],
-            date=incident_data['date'],
+            description=incident_data["description"],
+            date=incident_data["date"],
             registration_medium=registration_medium_enum,
-            user_id=incident_data['user_id'],
-            agent_id_creation=incident_data['agent_id'],
-            agent_id_last_update=incident_data['agent_id']
+            user_id=incident_data["user_id"],
+            agent_id_creation=incident_data["agent_id"],
+            agent_id_last_update=incident_data["agent_id"],
         )
         db.session.add(incident)
         try:
@@ -79,23 +79,23 @@ class IncidentDetail(Resource):
         except Exception as e:
             return {"msg": "Invalid data", "error": str(e)}, 400
 
-        registration_medium = incident_data['registration_medium']
+        registration_medium = incident_data["registration_medium"]
         try:
             registration_medium_enum = RegistrationMediumEnum(registration_medium)
         except ValueError:
             return {"msg": "Invalid registration medium"}, 400
-        
-        status = incident_data['status']
+
+        status = incident_data["status"]
         try:
             status_enum = StatusEnum(status)
         except ValueError:
             return {"msg": "Invalid status"}, 400
 
-        incident.description = incident_data['description']
-        incident.date = incident_data['date']
+        incident.description = incident_data["description"]
+        incident.date = incident_data["date"]
         incident.registration_medium = registration_medium_enum
-        incident.user_id = incident_data['user_id']
-        incident.agent_id_last_update = incident_data['agent_id']
+        incident.user_id = incident_data["user_id"]
+        incident.agent_id_last_update = incident_data["agent_id"]
         incident.status = status_enum
 
         db.session.add(incident)

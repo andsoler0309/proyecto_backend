@@ -4,8 +4,14 @@ def test_app_creation(app):
 
 
 def test_models_import():
-    from models import (AgentIPAddress, FailedAttempt, IPAddressLoginAttempt,
-                        Session, TokenBlacklist, Verification)
+    from models import (
+        AgentIPAddress,
+        FailedAttempt,
+        IPAddressLoginAttempt,
+        Session,
+        TokenBlacklist,
+        Verification,
+    )
 
     assert Verification is not None
     assert TokenBlacklist is not None
