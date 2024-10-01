@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 def test_ping(client):
     response = client.get("/api-gateway/ping")
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.get_json() == {"status": "alive"}
 
 
