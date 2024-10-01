@@ -36,11 +36,11 @@ jobs:
       - name: Instalar dependencias
         run: |
           cd ${{ matrix.service }}
-          python -m venv venv
+          python -m venv venv --upgrade-deps
           source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install black isort autoflake
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install black isort autoflake pytest
 
       - name: Formatear código con Black
         run: |
@@ -79,8 +79,10 @@ jobs:
       - name: Instalar dependencias para pruebas
         run: |
           cd ${{ matrix.service }}
+          python -m venv venv --upgrade-deps
           source venv/bin/activate
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
 
       - name: Ejecutar pruebas
         run: |
