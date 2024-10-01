@@ -24,6 +24,4 @@ class UserView(Resource):
 
 class Ping(Resource):
     def get(self):
-        return {
-            "status": "healthy"
-        }
+        return {"status": "healthy"}

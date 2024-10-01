@@ -14,7 +14,7 @@ class Plan(db.Model):
     descripcion = db.Column(db.Text, nullable=False)
 
     def __repr__(self):
-        return f'<Plan {self.nombre}>'
+        return f"<Plan {self.nombre}>"
 
 
 class Client(db.Model):
@@ -24,9 +24,11 @@ class Client(db.Model):
     name = db.Column(db.String(255), nullable=False)
     company_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
-    updated_at = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-    plan_id = db.Column(db.Integer, db.ForeignKey('plan.id'), nullable=True)
-    plan = db.relationship('Plan', backref='users')
+    updated_at = db.Column(
+        db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now()
+    )
+    plan_id = db.Column(db.Integer, db.ForeignKey("plan.id"), nullable=True)
+    plan = db.relationship("Plan", backref="users")
 
     def __repr__(self):
-        return f'<User {self.email}>'
+        return f"<User {self.email}>"

@@ -24,29 +24,29 @@ def create_app():
         if Plan.query.count() == 0:
             plans = [
                 Plan(
-                    nombre='Emprendedor',
+                    nombre="Emprendedor",
                     descripcion=(
                         "Servicio básico para empresas que desean atención telefónica a sus clientes o interesados. "
                         "Incluye registro de PQRs, atención telefónica por agentes, búsqueda en base de conocimientos, "
                         "y procesos de escalamiento automatizados."
-                    )
+                    ),
                 ),
                 Plan(
-                    nombre='Empresario',
+                    nombre="Empresario",
                     descripcion=(
                         "Servicio avanzado con múltiples canales de comunicación: teléfono, chatbot, app móvil, y correo electrónico. "
                         "Incluye todas las funcionalidades del plan Emprendedor más llamadas de salida, tablero de control para análisis, "
                         "y gestión avanzada de incidentes."
-                    )
+                    ),
                 ),
                 Plan(
-                    nombre='Empresario Plus',
+                    nombre="Empresario Plus",
                     descripcion=(
                         "Servicio completo con todos los canales de atención del plan Empresario más capacidades de inteligencia artificial "
                         "y aprendizaje automático. Incluye análisis predictivo de PQRs, respuestas automáticas apoyadas por modelos analíticos, "
                         "y soporte para verticales específicas como telcos, retail, banca, entre otros."
-                    )
-                )
+                    ),
+                ),
             ]
             db.session.add_all(plans)
             db.session.commit()
@@ -56,14 +56,13 @@ def create_app():
     api = Api(app)
 
     # Register API resources
-    api.add_resource(ClientRegistration, '/clients/register')
-    api.add_resource(ClientLogin, '/clients/login')
+    api.add_resource(ClientRegistration, "/clients/register")
+    api.add_resource(ClientLogin, "/clients/login")
     # api.add_resource(AgentDetail, '/agents/<string:agent_id>')
     # api.add_resource(AgentLock, '/agents/<string:agent_id>/lock')
     # api.add_resource(AgentUnlock, '/agents/<string:agent_id>/unlock')
     # api.add_resource(AgentReset, '/agents/<string:agent_id>/reset')
-    api.add_resource(Ping, '/gestor-clientes/ping')
-
+    api.add_resource(Ping, "/gestor-clientes/ping")
 
     return app
 
@@ -71,5 +70,5 @@ def create_app():
 app = create_app()
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)

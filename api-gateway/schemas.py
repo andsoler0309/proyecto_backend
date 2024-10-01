@@ -35,9 +35,17 @@ class AgentCreationSchema(Schema):
 
 
 class IncidentCreationSchema(Schema):
-    agent_id = fields.Str(required=True)
+    agent_id_creation = fields.Str(required=True)
     description = fields.Str(required=True, validate=validate.Length(min=1))
     date = fields.Date(required=True)
+    registration_medium = fields.Str(
+        required=True, validate=validate.OneOf(["email", "phone", "chat"])
+    )
+    user_id = fields.Str(required=True)
+    status = fields.Str(dump_only=True)
+    agent_id_last_update = fields.Str(dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
 
 
 class AdminActionSchema(Schema):
