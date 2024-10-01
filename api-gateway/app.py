@@ -4,8 +4,8 @@ from flask_restful import Api
 
 from config import Config
 from models import db
-from views import *
 from services import *
+from views import *
 
 
 def create_app():

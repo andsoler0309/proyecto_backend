@@ -11,8 +11,8 @@ from auth import role_required, token_required
 from config import Config
 from models import (AgentIPAddress, IPAddressLoginAttempt, Session, UserRole,
                     Verification, db)
-from schemas import (AgentCreationSchema, LoginSchema,
-                     SecurityAnswerSchema, VerificationSchema)
+from schemas import (AgentCreationSchema, LoginSchema, SecurityAnswerSchema,
+                     VerificationSchema)
 from utils import (blacklist_token, decode_jwt, generate_jwt,
                    increment_failed_attempts, is_new_ip, lock_agent_account,
                    notify_admin, reset_failed_attempts)
