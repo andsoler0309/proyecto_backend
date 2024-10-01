@@ -5,6 +5,7 @@ from flask_restful import Api
 from config import Config
 from models import db
 from views import *
+from services import *
 
 
 def create_app():
@@ -46,6 +47,24 @@ def create_app():
         "/incidents/<string:incident_id>",
         endpoint="delete_incident",
         methods=["DELETE"],
+    )
+    api.add_resource(
+        GetIncidentsByAgent,
+        "/incidents/agent/<string:agent_id>",
+        endpoint="get_incidents_by_agent",
+        methods=["GET"],
+    )
+    api.add_resource(
+        GetIncidentsByUser,
+        "/incidents/user/<string:user_id>",
+        endpoint="get_incidents_by_user",
+        methods=["GET"],
+    )
+    api.add_resource(
+        GetIncidentDetail,
+        "/incidents/<string:incident_id>",
+        endpoint="get_incident_detail",
+        methods=["GET"],
     )
     api.add_resource(Logout, "/agents/logout", endpoint="logout", methods=["POST"])
     api.add_resource(

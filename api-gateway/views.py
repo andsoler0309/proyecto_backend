@@ -11,7 +11,7 @@ from auth import role_required, token_required
 from config import Config
 from models import (AgentIPAddress, IPAddressLoginAttempt, Session, UserRole,
                     Verification, db)
-from schemas import (AgentCreationSchema, IncidentCreationSchema, LoginSchema,
+from schemas import (AgentCreationSchema, LoginSchema,
                      SecurityAnswerSchema, VerificationSchema)
 from utils import (blacklist_token, decode_jwt, generate_jwt,
                    increment_failed_attempts, is_new_ip, lock_agent_account,
@@ -21,7 +21,6 @@ login_schema = LoginSchema()
 security_answer_schema = SecurityAnswerSchema()
 verification_schema = VerificationSchema()
 agent_creation_schema = AgentCreationSchema()
-incident_creation_schema = IncidentCreationSchema()
 
 
 # client = OpenAI(api_key=Config.OPENAI_API_KEY)
@@ -428,76 +427,6 @@ class DeleteAgent(Resource):
             return gestor_response.json(), gestor_response.status_code
 
         return {"msg": "Agent deleted successfully"}, 200
-
-
-class CreateIncident(Resource):
-    @token_required
-    def post(self, current_agent):
-        data = request.get_json()
-        try:
-            validated_data = incident_creation_schema.load(data)
-        except ValidationError as err:
-            return {"msg": "Invalid data", "errors": err.messages}, 400
-
-        if validated_data["agent_id"] != current_agent["id"]:
-            return {"msg": "Cannot create incident for another agent"}, 403
-
-        for key, value in validated_data.items():
-            if isinstance(value, datetime.date):
-                validated_data[key] = value.isoformat()
-
-        # Forward the incident creation to Incidents service
-        try:
-            incidents_response = requests.post(
-                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents",
-                json=validated_data,
-                timeout=5,
-            )
-        except requests.exceptions.RequestException as e:
-            current_app.logger.error(f"Error communicating with Incidents Service: {e}")
-            return {"msg": "Error communicating with Incidents Service"}, 503
-
-        if incidents_response.status_code != 201:
-            return incidents_response.json(), incidents_response.status_code
-
-        return incidents_response.json(), 201
-
-
-class DeleteIncident(Resource):
-    @token_required
-    def delete(self, current_agent, incident_id):
-        try:
-            incident_response = requests.get(
-                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5,
-            )
-            if incident_response.status_code != 200:
-                return incident_response.json(), incident_response.status_code
-            incident = incident_response.json()
-        except requests.exceptions.RequestException as e:
-            current_app.logger.error(f"Error communicating with Incidents Service: {e}")
-            return {"msg": "Error communicating with Incidents Service"}, 503
-
-        if (
-            incident["agent_id"] != current_agent["id"]
-            and current_agent["role"] != "admin"
-        ):
-            return {"msg": "Unauthorized to delete this incident"}, 403
-
-        # Forward the incident deletion to Incidents service
-        try:
-            delete_response = requests.delete(
-                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5,
-            )
-        except requests.exceptions.RequestException as e:
-            current_app.logger.error(f"Error communicating with Incidents Service: {e}")
-            return {"msg": "Error communicating with Incidents Service"}, 503
-
-        if delete_response.status_code not in [200, 204]:
-            return delete_response.json(), delete_response.status_code
-
-        return {"msg": "Incident deleted successfully"}, 200
 
 
 class AdminUnlockAgent(Resource):
