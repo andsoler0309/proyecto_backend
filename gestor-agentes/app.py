@@ -26,15 +26,14 @@ def create_app():
     api = Api(app)
 
     # Register API resources
-    api.add_resource(AgentRegistration, '/agents/register')
-    api.add_resource(AgentLogin, '/agent/login')
-    api.add_resource(AgentDetail, '/agents/<string:agent_id>')
-    api.add_resource(AgentLock, '/agents/<string:agent_id>/lock')
-    api.add_resource(AgentUnlock, '/agents/<string:agent_id>/unlock')
-    api.add_resource(AgentReset, '/agents/<string:agent_id>/reset')
-    api.add_resource(Ping, '/gestor-agentes/ping')
-    api.add_resource(AdminList, '/agents/admins')
-
+    api.add_resource(AgentRegistration, "/agents/register")
+    api.add_resource(AgentLogin, "/agent/login")
+    api.add_resource(AgentDetail, "/agents/<string:agent_id>")
+    api.add_resource(AgentLock, "/agents/<string:agent_id>/lock")
+    api.add_resource(AgentUnlock, "/agents/<string:agent_id>/unlock")
+    api.add_resource(AgentReset, "/agents/<string:agent_id>/reset")
+    api.add_resource(Ping, "/gestor-agentes/ping")
+    api.add_resource(AdminList, "/agents/admins")
 
     return app
 
@@ -42,5 +41,5 @@ def create_app():
 app = create_app()
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)

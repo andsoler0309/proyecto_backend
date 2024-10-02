@@ -8,20 +8,27 @@ from enum import Enum
 db = SQLAlchemy()
 
 
-class ClientRole(Enum):
-    ADMIN = "admin"
-    USER = "user"
+class Plan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50), nullable=False)
+    descripcion = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f"<Plan {self.nombre}>"
 
 
 class Client(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50))
-    password = db.Column(db.String(50))
-    role = db.Column(SQLAEnum(ClientRole), nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    company_name = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(
+        db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now()
+    )
+    plan_id = db.Column(db.Integer, db.ForeignKey("plan.id"), nullable=True)
+    plan = db.relationship("Plan", backref="users")
 
-
-class ClientSchema(SQLAlchemyAutoSchema):
-    class Meta:
-        model = Client
-        include_relationships = True
-        load_instance = True
+    def __repr__(self):
+        return f"<User {self.email}>"

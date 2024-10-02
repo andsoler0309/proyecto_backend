@@ -25,12 +25,11 @@ class ReportView(Resource):
 
         # Simular falla aleatoria
         if random.randint(1, 10) >= 3:
-            return {'error': 'Internal Server Error'}, 500
+            return {"error": "Internal Server Error"}, 500
 
-        return {'report': 'Reporte generado exitosamente'}, 200
+        return {"report": "Reporte generado exitosamente"}, 200
+
 
 class Ping(Resource):
     def get(self):
-        return {
-            "status": "healthy"
-        }
+        return {"status": "healthy"}

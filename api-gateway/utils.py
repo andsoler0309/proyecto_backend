@@ -10,8 +10,7 @@ import requests
 from flask import current_app
 
 from config import Config
-from models import (AgentIPAddress, FailedAttempt, TokenBlacklist,
-                    db)
+from models import AgentIPAddress, FailedAttempt, TokenBlacklist, db
 
 
 def generate_jwt(agent_id, session_id):

@@ -1,10 +1,11 @@
 from flask import Flask
 from flask_restful import Api
 from models import db
-from views import IncidentList, IncidentDetail, Ping
+from views import IncidentList, IncidentDetail, Ping, GetIncidentsByUser
 from flask_migrate import Migrate
 from flask_cors import CORS
 import os
+
 
 def create_app():
     app = Flask(__name__)
@@ -24,14 +25,15 @@ def create_app():
     api = Api(app)
 
     # Register API resources
-    api.add_resource(IncidentList, '/incidents')
-    api.add_resource(IncidentDetail, '/incidents/<string:incident_id>')
-    api.add_resource(Ping, '/gestor-incidentes/ping')
-
+    api.add_resource(IncidentList, "/incidents")
+    api.add_resource(IncidentDetail, "/incidents/<string:incident_id>")
+    api.add_resource(GetIncidentsByUser, "/incidents/user/<string:user_id>")
+    api.add_resource(Ping, "/gestor-incidentes/ping")
 
     return app
 
+
 app = create_app()
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5002, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5002, debug=True)

@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
-from utils import (blacklist_token, decode_jwt, generate_jwt,
-                   is_token_blacklisted)
+from utils import blacklist_token, decode_jwt, generate_jwt, is_token_blacklisted
 
 
 def test_generate_jwt():
