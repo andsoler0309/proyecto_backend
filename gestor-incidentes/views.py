@@ -1,23 +1,17 @@
 from flask import request
 from flask_restful import Resource
 from models import db, Incident
-from schemas import IncidentSchema
+from schemas import IncidentSchema, IncidentUpdateSchema
 from sqlalchemy.exc import IntegrityError
 from models import RegistrationMediumEnum, StatusEnum
 
 incident_schema = IncidentSchema()
 incidents_schema = IncidentSchema(many=True)
 
+incident_update_schema = IncidentUpdateSchema()
+
 
 class IncidentList(Resource):
-    def get(self):
-        agent_id = request.args.get("agent_id")
-        if agent_id:
-            incidents = Incident.query.filter_by(agent_id=agent_id).all()
-        else:
-            incidents = Incident.query.all()
-        return incidents_schema.dump(incidents), 200
-
     def post(self):
         data = request.get_json()
         try:
@@ -53,6 +47,12 @@ class IncidentList(Resource):
         return incident_schema.dump(incident), 201
 
 
+class GetIncidentsByAgentId(Resource):
+    def get(self, agent_id):
+        incidents = Incident.query.filter_by(agent_id_creation=agent_id).all()
+        return incidents_schema.dump(incidents), 200
+
+
 class IncidentDetail(Resource):
     def get(self, incident_id):
         incident = Incident.query.get(incident_id)
@@ -75,7 +75,7 @@ class IncidentDetail(Resource):
 
         data = request.get_json()
         try:
-            incident_data = incident_schema.load(data)
+            incident_data = incident_update_schema.load(data)
         except Exception as e:
             return {"msg": "Invalid data", "error": str(e)}, 400
 
