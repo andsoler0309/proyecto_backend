@@ -53,7 +53,8 @@ class ClientLogin(Resource):
             return {"msg": "Bad username or password"}, 401
 
         return client_schema.dump(client), 200
-    
+
+
 class ClientDetail(Resource):
     def get(self, client_id):
         client = Client.query.get(client_id)
@@ -179,7 +180,7 @@ class ClientPlan(Resource):
         db.session.commit()
 
         return client_schema.dump(client), 200
-    
+
     def get(self, client_id):
         client = Client.query.get(client_id)
         if not client:

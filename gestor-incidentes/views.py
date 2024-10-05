@@ -1,7 +1,7 @@
 from flask import request
 from flask_restful import Resource
 from models import db, Incident
-from schemas import IncidentSchema,  IncidentUpdateSchema
+from schemas import IncidentSchema, IncidentUpdateSchema
 from sqlalchemy.exc import IntegrityError
 from models import RegistrationMediumEnum, StatusEnum
 
@@ -45,6 +45,7 @@ class IncidentList(Resource):
             return {"msg": "Error creating incident"}, 500
 
         return incident_schema.dump(incident), 201
+
 
 class GetIncidentsByAgentId(Resource):
     def get(self, agent_id):

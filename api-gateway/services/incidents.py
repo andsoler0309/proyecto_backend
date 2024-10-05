@@ -30,8 +30,10 @@ class CreateIncident(Resource):
             if isinstance(value, datetime.date):
                 validated_data[key] = value.isoformat()
 
-        validated_data["registration_medium"] = validated_data["registration_medium"].upper()
- 
+        validated_data["registration_medium"] = validated_data[
+            "registration_medium"
+        ].upper()
+
         # Forward the incident creation to Incidents service
         try:
             incidents_response = requests.post(
@@ -105,7 +107,9 @@ class UpdateIncident(Resource):
             if isinstance(value, datetime.date):
                 validated_data[key] = value.isoformat()
 
-        validated_data["registration_medium"] = validated_data["registration_medium"].upper()
+        validated_data["registration_medium"] = validated_data[
+            "registration_medium"
+        ].upper()
 
         # Forward the incident update to Incidents service
         try:
@@ -140,12 +144,9 @@ class GetIncidentDetail(Resource):
             return {"msg": "Error communicating with Incidents Service"}, 503
 
         if (
-            (   
-                incident["agent_id_creation"] != current_agent["id"]
-                or incident["agent_id_last_update"] != current_agent["id"]
-            )
-            and current_agent["role"] != "admin"
-        ):
+            incident["agent_id_creation"] != current_agent["id"]
+            or incident["agent_id_last_update"] != current_agent["id"]
+        ) and current_agent["role"] != "admin":
             return {"msg": "Unauthorized to view this incident"}, 403
 
         return incident, 200

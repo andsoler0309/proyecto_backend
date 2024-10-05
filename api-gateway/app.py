@@ -54,7 +54,7 @@ def create_app():
         "/incidents/<string:incident_id>",
         endpoint="update_incident",
         methods=["PUT"],
-    ) 
+    )
     api.add_resource(
         GetIncidentsByAgent,
         "/incidents",

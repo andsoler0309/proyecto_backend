@@ -47,7 +47,7 @@ class Client(db.Model):
 
     def __repr__(self):
         return f"<User {self.email}>"
-    
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
