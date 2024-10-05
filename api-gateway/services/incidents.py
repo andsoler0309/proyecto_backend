@@ -5,11 +5,13 @@ from flask import current_app, request
 from flask_restful import Resource
 from marshmallow import ValidationError
 
-from auth import token_required
+from auth import token_required, role_required
 from config import Config
-from schemas import IncidentCreationSchema
+from schemas import IncidentCreationSchema, IncidentUpdateSchema
+from models import UserRole
 
 incident_creation_schema = IncidentCreationSchema()
+incident_update_schema = IncidentUpdateSchema()
 
 
 class CreateIncident(Resource):
@@ -28,6 +30,8 @@ class CreateIncident(Resource):
             if isinstance(value, datetime.date):
                 validated_data[key] = value.isoformat()
 
+        validated_data["registration_medium"] = validated_data["registration_medium"].upper()
+ 
         # Forward the incident creation to Incidents service
         try:
             incidents_response = requests.post(
@@ -46,7 +50,7 @@ class CreateIncident(Resource):
 
 
 class DeleteIncident(Resource):
-    @token_required
+    @role_required([UserRole.ADMIN.name])
     def delete(self, current_agent, incident_id):
         try:
             incident_response = requests.get(
@@ -59,12 +63,6 @@ class DeleteIncident(Resource):
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
-
-        if (
-            incident["agent_id"] != current_agent["id"]
-            and current_agent["role"] != "admin"
-        ):
-            return {"msg": "Unauthorized to delete this incident"}, 403
 
         # Forward the incident deletion to Incidents service
         try:
@@ -87,7 +85,7 @@ class UpdateIncident(Resource):
     def put(self, current_agent, incident_id):
         data = request.get_json()
         try:
-            validated_data = incident_creation_schema.load(data)
+            validated_data = incident_update_schema.load(data)
         except ValidationError as err:
             return {"msg": "Invalid data", "errors": err.messages}, 400
 
@@ -103,15 +101,11 @@ class UpdateIncident(Resource):
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
 
-        if (
-            incident["agent_id"] != current_agent["id"]
-            and current_agent["role"] != "admin"
-        ):
-            return {"msg": "Unauthorized to update this incident"}, 403
-
         for key, value in validated_data.items():
             if isinstance(value, datetime.date):
                 validated_data[key] = value.isoformat()
+
+        validated_data["registration_medium"] = validated_data["registration_medium"].upper()
 
         # Forward the incident update to Incidents service
         try:
@@ -146,7 +140,10 @@ class GetIncidentDetail(Resource):
             return {"msg": "Error communicating with Incidents Service"}, 503
 
         if (
-            incident["agent_id"] != current_agent["id"]
+            (   
+                incident["agent_id_creation"] != current_agent["id"]
+                or incident["agent_id_last_update"] != current_agent["id"]
+            )
             and current_agent["role"] != "admin"
         ):
             return {"msg": "Unauthorized to view this incident"}, 403
@@ -169,19 +166,14 @@ class GetIncidentsByUser(Resource):
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
 
-        if (
-            incidents
-            and incidents[0]["agent_id"] != current_agent["id"]
-            and current_agent["role"] != "admin"
-        ):
-            return {"msg": "Unauthorized to view these incidents"}, 403
-
         return incidents, 200
 
 
 class GetIncidentsByAgent(Resource):
     @token_required
-    def get(self, current_agent, agent_id):
+    def get(self, current_agent):
+        agent_id = current_agent["id"]
+
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/agent/{agent_id}",
@@ -193,8 +185,5 @@ class GetIncidentsByAgent(Resource):
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
-
-        if current_agent["role"] != "admin":
-            return {"msg": "Unauthorized to view these incidents"}, 403
 
         return incidents, 200

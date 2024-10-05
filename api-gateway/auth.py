@@ -114,3 +114,39 @@ def role_required(required_roles):
         return decorated
 
     return decorator
+
+
+def client_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if "Authorization" in request.headers:
+            auth_header = request.headers["Authorization"]
+            parts = auth_header.split()
+            if len(parts) == 2 and parts[0].lower() == "bearer":
+                token = parts[1]
+        if not token:
+            return {"msg": "Token is missing"}, 401
+
+        try:
+            payload = decode_jwt(token)
+            if not payload:
+                return {"msg": "Invalid or expired token"}, 401
+            jti = payload.get("jti")
+            if is_token_blacklisted(jti):
+                return {"msg": "Token has been revoked"}, 401
+            client_id = payload["client_id"]
+
+            # Verify client existence via Gestor-Clientes
+            response = requests.get(
+                f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}", timeout=5
+            )
+            if response.status_code != 200:
+                return {"msg": "Client not found"}, 401
+            current_client = response.json()
+        except Exception as e:
+            return {"msg": "Token verification failed"}, 401
+
+        return f(args[0], current_client, *args[1:], **kwargs)
+
+    return decorated

@@ -27,3 +27,14 @@ class PlanSchema(SQLAlchemyAutoSchema):
     id = fields.String()
     nombre = fields.String(required=True)
     descripcion = fields.String(required=True)
+
+
+class ClientPlanSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Client
+        include_relationships = False
+        load_instance = True
+
+    id = fields.String()
+    nombre = fields.String(required=True)
+    descripcion = fields.String(required=True)

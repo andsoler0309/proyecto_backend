@@ -58,10 +58,10 @@ def create_app():
     # Register API resources
     api.add_resource(ClientRegistration, "/clients/register")
     api.add_resource(ClientLogin, "/clients/login")
-    # api.add_resource(AgentDetail, '/agents/<string:agent_id>')
-    # api.add_resource(AgentLock, '/agents/<string:agent_id>/lock')
-    # api.add_resource(AgentUnlock, '/agents/<string:agent_id>/unlock')
-    # api.add_resource(AgentReset, '/agents/<string:agent_id>/reset')
+    api.add_resource(ClientDetail, "/clients/<string:client_id>")
+    api.add_resource(Plans, "/plans")
+    api.add_resource(ClientPlan, "/clients/<string:client_id>/plan")
+    api.add_resource(SelectClientPlan, "/clients/<string:client_id>/plan/<string:plan_id>")
     api.add_resource(Ping, "/gestor-clientes/ping")
 
     return app

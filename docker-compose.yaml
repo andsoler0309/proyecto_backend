@@ -113,75 +113,73 @@ services:
         condition: service_healthy
       
 
-  generacion-reportes:
-    build:
-      context: ./generacion-reportes
-    ports:
-      - "5002:5000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
-      - VIEW_360_BASE_URL=http://vista-360:5000
-    networks:
-      - incidentes-net
-      - abcall-net
-    depends_on:
-      incidentes-db:
-        condition: service_healthy
+  # generacion-reportes:
+  #   build:
+  #     context: ./generacion-reportes
+  #   ports:
+  #     - "5002:5000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
+  #     - VIEW_360_BASE_URL=http://vista-360:5000
+  #   networks:
+  #     - incidentes-net
+  #     - abcall-net
+  #   depends_on:
+  #     incidentes-db:
+  #       condition: service_healthy
 
-    
-  
-  gestor-incidentes:
-    build:
-      context: ./gestor-incidentes
-    ports:
-      - "5003:5000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
-      - VIEW_360_BASE_URL=http://vista-360:5000
-    networks:
-      - incidentes-net
-      - abcall-net
-    depends_on:
-      incidentes-db:
-        condition: service_healthy
+  # gestor-incidentes:
+  #   build:
+  #     context: ./gestor-incidentes
+  #   ports:
+  #     - "5003:5000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
+  #     - VIEW_360_BASE_URL=http://vista-360:5000
+  #   networks:
+  #     - incidentes-net
+  #     - abcall-net
+  #   depends_on:
+  #     incidentes-db:
+  #       condition: service_healthy
 
-  gestor-fidelizacion:
-    build:
-      context: ./gestor-fidelizacion
-    ports:
-      - "5004:5000"
-    environment:
-      - VIEW_360_BASE_URL=http://vista-360:5000
-    networks:
-      - abcall-net
+  # gestor-fidelizacion:
+  #   build:
+  #     context: ./gestor-fidelizacion
+  #   ports:
+  #     - "5004:5000"
+  #   environment:
+  #     - VIEW_360_BASE_URL=http://vista-360:5000
+  #   networks:
+  #     - abcall-net
 
-  vista-360:
-    build:
-      context: ./vista-360
-    ports:
-      - "5005:5000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
-    networks:
-      - abcall-net
-      - usuarios-net
-    depends_on:
-      usuarios-db:
-        condition: service_healthy
+  # vista-360:
+  #   build:
+  #     context: ./vista-360
+  #   ports:
+  #     - "5005:5000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
+  #   networks:
+  #     - abcall-net
+  #     - usuarios-net
+  #   depends_on:
+  #     usuarios-db:
+  #       condition: service_healthy
 
-  gestor-agentes:
-    build:
-      context: ./gestor-agentes
-    ports:
-      - "5006:5000"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@agentes-db:5432/agentesdb
-    networks:
-      - abcall-net
-      - agentes-net
-    depends_on:
-      agentes-db:
-        condition: service_healthy
+  # gestor-agentes:
+  #   build:
+  #     context: ./gestor-agentes
+  #   ports:
+  #     - "5006:5000"
+  #   environment:
+  #     - DATABASE_URL=postgresql://postgres:postgres@agentes-db:5432/agentesdb
+  #   networks:
+  #     - abcall-net
+  #     - agentes-net
+  #   depends_on:
+  #     agentes-db:
+  #       condition: service_healthy
 
 volumes:
   usuarios_data:

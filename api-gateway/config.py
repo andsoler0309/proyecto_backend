@@ -12,6 +12,9 @@ class Config:
     GESTOR_INCIDENTES_BASE_URL = (
         os.getenv("GESTOR_INCIDENTES_BASE_URL") or "http://localhost:5002"
     )
+    GESTOR_CLIENTES_BASE_URL = (
+        os.getenv("GESTOR_CLIENTES_BASE_URL") or "http://localhost:5003"
+    )
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or "your_openai_api_key"
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or "sqlite:///api_gateway.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
