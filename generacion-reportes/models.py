@@ -8,7 +8,6 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 db = SQLAlchemy()
 
 
-
 class Report(db.Model):
     id = db.Column(
         db.String(36),

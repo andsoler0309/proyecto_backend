@@ -30,4 +30,3 @@ class ReportView(Resource):
             return {"error": "Internal Server Error"}, 500
 
         return {"report": "Reporte generado exitosamente"}, 200
-

@@ -11,10 +11,18 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["PROPAGATE_EXCEPTIONS"] = True
-    app.config["VIEW_360_BASE_URL"] = os.getenv("VIEW_360_BASE_URL", "http://localhost:5003")
-    app.config["GESTOR_INCIDENTES_BASE_URL"] = os.getenv("GESTOR_INCIDENTES_BASE_URL", "http://localhost:5002")
-    app.config["GESTOR_CLIENTES_BASE_URL"] = os.getenv("GESTOR_CLIENTES_BASE_URL", "http://localhost:5000")
-    app.config["GESTOR_AGENTES_BASE_URL"] = os.getenv("GESTOR_AGENTES_BASE_URL", "http://localhost:5001")
+    app.config["VIEW_360_BASE_URL"] = os.getenv(
+        "VIEW_360_BASE_URL", "http://localhost:5003"
+    )
+    app.config["GESTOR_INCIDENTES_BASE_URL"] = os.getenv(
+        "GESTOR_INCIDENTES_BASE_URL", "http://localhost:5002"
+    )
+    app.config["GESTOR_CLIENTES_BASE_URL"] = os.getenv(
+        "GESTOR_CLIENTES_BASE_URL", "http://localhost:5000"
+    )
+    app.config["GESTOR_AGENTES_BASE_URL"] = os.getenv(
+        "GESTOR_AGENTES_BASE_URL", "http://localhost:5001"
+    )
 
     app_context = app.app_context()
     app_context.push()
