@@ -129,7 +129,6 @@ class UpdateIncident(Resource):
 
 
 class GetIncidentDetail(Resource):
-    @token_required
     def get(self, current_agent, incident_id):
         try:
             incident_response = requests.get(
@@ -153,7 +152,6 @@ class GetIncidentDetail(Resource):
 
 
 class GetIncidentsByUser(Resource):
-    @token_required
     def get(self, current_agent, user_id):
         try:
             incidents_response = requests.get(
@@ -171,7 +169,6 @@ class GetIncidentsByUser(Resource):
 
 
 class GetIncidentsByAgent(Resource):
-    @token_required
     def get(self, current_agent):
         agent_id = current_agent["id"]
 

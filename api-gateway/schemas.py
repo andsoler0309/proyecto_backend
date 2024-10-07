@@ -45,6 +45,7 @@ class IncidentCreationSchema(Schema):
     agent_id_last_update = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    client_id = fields.Str(required=True)
 
 
 class IncidentUpdateSchema(Schema):
@@ -58,6 +59,7 @@ class IncidentUpdateSchema(Schema):
     agent_id_last_update = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    client_id = fields.Str(dump_only=True)
 
 
 class AdminActionSchema(Schema):

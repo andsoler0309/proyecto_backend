@@ -113,35 +113,37 @@ services:
         condition: service_healthy
       
 
-  # generacion-reportes:
-  #   build:
-  #     context: ./generacion-reportes
-  #   ports:
-  #     - "5002:5000"
-  #   environment:
-  #     - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
-  #     - VIEW_360_BASE_URL=http://vista-360:5000
-  #   networks:
-  #     - incidentes-net
-  #     - abcall-net
-  #   depends_on:
-  #     incidentes-db:
-  #       condition: service_healthy
+  generacion-reportes:
+    build:
+      context: ./generacion-reportes
+    ports:
+      - "5002:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
+      - GESTOR_INCIDENTES_BASE_URL=http://gestor-incidentes:5000
+      - GESTOR_CLIENTES_BASE_URL=http://gestor-clientes:5000
+      - GESTOR_AGENTES_BASE_URL=http://gestor-agentes:5000
+    networks:
+      - incidentes-net
+      - abcall-net
+    depends_on:
+      incidentes-db:
+        condition: service_healthy
 
-  # gestor-incidentes:
-  #   build:
-  #     context: ./gestor-incidentes
-  #   ports:
-  #     - "5003:5000"
-  #   environment:
-  #     - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
-  #     - VIEW_360_BASE_URL=http://vista-360:5000
-  #   networks:
-  #     - incidentes-net
-  #     - abcall-net
-  #   depends_on:
-  #     incidentes-db:
-  #       condition: service_healthy
+  gestor-incidentes:
+    build:
+      context: ./gestor-incidentes
+    ports:
+      - "5003:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
+      - VIEW_360_BASE_URL=http://vista-360:5000
+    networks:
+      - incidentes-net
+      - abcall-net
+    depends_on:
+      incidentes-db:
+        condition: service_healthy
 
   # gestor-fidelizacion:
   #   build:
@@ -167,19 +169,19 @@ services:
   #     usuarios-db:
   #       condition: service_healthy
 
-  # gestor-agentes:
-  #   build:
-  #     context: ./gestor-agentes
-  #   ports:
-  #     - "5006:5000"
-  #   environment:
-  #     - DATABASE_URL=postgresql://postgres:postgres@agentes-db:5432/agentesdb
-  #   networks:
-  #     - abcall-net
-  #     - agentes-net
-  #   depends_on:
-  #     agentes-db:
-  #       condition: service_healthy
+  gestor-agentes:
+    build:
+      context: ./gestor-agentes
+    ports:
+      - "5006:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@agentes-db:5432/agentesdb
+    networks:
+      - abcall-net
+      - agentes-net
+    depends_on:
+      agentes-db:
+        condition: service_healthy
 
 volumes:
   usuarios_data:
