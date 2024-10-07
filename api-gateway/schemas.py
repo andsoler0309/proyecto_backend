@@ -39,9 +39,7 @@ class IncidentCreationSchema(Schema):
     agent_id_creation = fields.Str(dump_only=True)
     description = fields.Str(required=True, validate=validate.Length(min=1))
     date = fields.Date(required=True)
-    registration_medium = fields.Str(
-        required=True
-    )
+    registration_medium = fields.Str(required=True)
     user_id = fields.Int(required=True)
     status = fields.Str(dump_only=True)
     agent_id_last_update = fields.Str(dump_only=True)
@@ -54,9 +52,7 @@ class IncidentUpdateSchema(Schema):
     agent_id_creation = fields.Str(dump_only=True)
     description = fields.Str(required=True, validate=validate.Length(min=1))
     date = fields.Date(required=True)
-    registration_medium = fields.Str(
-        required=True
-    )
+    registration_medium = fields.Str(required=True)
     user_id = fields.Int(required=True)
     status = fields.Str(required=True)
     agent_id_last_update = fields.Str(dump_only=True)

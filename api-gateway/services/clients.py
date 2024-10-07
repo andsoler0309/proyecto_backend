@@ -1,12 +1,16 @@
 import requests
 from flask import current_app, request
 from flask_restful import Resource
-from schemas import ClientSchema, PlanSchema, ClientCreationSchema, ClientPlanSchema, LoginSchema
+from schemas import (
+    ClientSchema,
+    PlanSchema,
+    ClientCreationSchema,
+    ClientPlanSchema,
+    LoginSchema,
+)
 from marshmallow import ValidationError
 from config import Config
-from utils import (
-    generate_jwt_client
-)
+from utils import generate_jwt_client
 from auth import client_required
 
 client_creation_schema = ClientCreationSchema()
@@ -65,7 +69,7 @@ class ClientLogin(Resource):
         if clients_response.status_code != 200:
             return {"msg": "Bad username or password"}, 401
 
-        client_id = clients_response.json()["id"]    
+        client_id = clients_response.json()["id"]
         token = generate_jwt_client(client_id)
 
         return {
@@ -106,7 +110,7 @@ class GetClientPlan(Resource):
             return {"msg": "Error communicating with Clients Service"}, 503
 
         return plan_response.json(), 200
-    
+
 
 class UpdateClient(Resource):
     def put(self, client_id):
@@ -130,7 +134,7 @@ class UpdateClient(Resource):
             return clients_response.json(), clients_response.status_code
 
         return clients_response.json(), 200
-    
+
 
 class UpdateClientPlan(Resource):
     @client_required
@@ -155,7 +159,7 @@ class UpdateClientPlan(Resource):
             return {"msg": "Error communicating with Clients Service"}, 503
 
         return plan_response.json(), 200
-    
+
 
 class SelectClientPlan(Resource):
     @client_required

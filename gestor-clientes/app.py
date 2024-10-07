@@ -61,7 +61,9 @@ def create_app():
     api.add_resource(ClientDetail, "/clients/<string:client_id>")
     api.add_resource(Plans, "/plans")
     api.add_resource(ClientPlan, "/clients/<string:client_id>/plan")
-    api.add_resource(SelectClientPlan, "/clients/<string:client_id>/plan/<string:plan_id>")
+    api.add_resource(
+        SelectClientPlan, "/clients/<string:client_id>/plan/<string:plan_id>"
+    )
     api.add_resource(Ping, "/gestor-clientes/ping")
 
     return app

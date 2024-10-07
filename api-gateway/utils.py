@@ -38,7 +38,6 @@ def generate_jwt_client(client_id):
     return token
 
 
-
 def decode_jwt(token):
     try:
         payload = jwt.decode(
