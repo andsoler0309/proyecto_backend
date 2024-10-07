@@ -36,6 +36,7 @@ class IncidentList(Resource):
             user_id=incident_data["user_id"],
             agent_id_creation=incident_data["agent_id"],
             agent_id_last_update=incident_data["agent_id"],
+            client_id=incident_data["client_id"],
         )
         db.session.add(incident)
         try:

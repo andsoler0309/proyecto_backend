@@ -16,6 +16,7 @@ class IncidentSchema(Schema):
     agent_id_last_update = fields.String(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    client_id = fields.String(required=True)
 
 
 class IncidentUpdateSchema(Schema):
@@ -30,3 +31,4 @@ class IncidentUpdateSchema(Schema):
     agent_id_last_update = fields.String(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    client_id = fields.String(dump_only=True)

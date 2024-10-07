@@ -149,8 +149,7 @@ class Login(Resource):
 
         try:
             incidents_response = requests.get(
-                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents",
-                params={"agent_id": agent_id},
+                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/agent/{agent_id}",
                 timeout=5,
             )
             if incidents_response.status_code != 200:
@@ -264,8 +263,7 @@ class VerifySecurityAnswer(Resource):
         # Fetch incidents from Incidents Service
         try:
             incidents_response = requests.get(
-                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents",
-                params={"agent_id": agent_id},
+                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/agent/{agent_id}",
                 timeout=5,
             )
             if incidents_response.status_code != 200:
