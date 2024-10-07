@@ -68,6 +68,12 @@ def create_app():
         methods=["GET"],
     )
     api.add_resource(
+        GetIncidentsByClient,
+        "/incidents/client/<string:client_id>",
+        endpoint="get_incidents_by_client",
+        methods=["GET"],
+    )
+    api.add_resource(
         GetIncidentDetail,
         "/incidents/<string:incident_id>",
         endpoint="get_incident_detail",

@@ -37,6 +37,7 @@ class Incident(db.Model):
     )
     status = db.Column(db.Enum(StatusEnum), nullable=False, default=StatusEnum.OPEN)
     agent_id_last_update = db.Column(db.String(36), nullable=True)
+    client_id = db.Column(db.String(36), nullable=False)
 
     def to_dict(self):
         return {
@@ -44,4 +45,7 @@ class Incident(db.Model):
             "agent_id": self.agent_id,
             "description": self.description,
             "date": self.date.isoformat(),
+            "registration_medium": self.registration_medium.value,
+            "user_id": self.user_id,
+            "status": self.status.value,
         }
