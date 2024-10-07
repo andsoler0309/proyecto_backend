@@ -188,3 +188,21 @@ class GetIncidentsByAgent(Resource):
             return {"msg": "Error communicating with Incidents Service"}, 503
 
         return incidents, 200
+
+
+class GetIncidentsByClient(Resource):
+    @token_required
+    def get(self, current_agent, client_id):
+        try:
+            incidents_response = requests.get(
+                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/client/{client_id}",
+                timeout=5,
+            )
+            if incidents_response.status_code != 200:
+                return incidents_response.json(), incidents_response.status_code
+            incidents = incidents_response.json()
+        except requests.exceptions.RequestException as e:
+            current_app.logger.error(f"Error communicating with Incidents Service: {e}")
+            return {"msg": "Error communicating with Incidents Service"}, 503
+
+        return incidents, 200

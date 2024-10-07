@@ -114,6 +114,12 @@ class GetIncidentsByUser(Resource):
         return incidents_schema.dump(incidents), 200
 
 
+class GetIncidentsByClient(Resource):
+    def get(self, client_id):
+        incidents = Incident.query.filter_by(client_id=client_id).all()
+        return incidents_schema.dump(incidents), 200
+
+
 class Ping(Resource):
     def get(self):
         return {"status": "alive"}, 200
