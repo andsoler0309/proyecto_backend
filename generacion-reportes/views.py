@@ -4,15 +4,15 @@ import random
 import time
 from flask_restful import Resource
 from flask import request, jsonify
+
 # from models import db, Report
 from config import Config
-
-
 
 
 class Ping(Resource):
     def get(self):
         return {"status": "healthy"}, 200
+
 
 class GenerateReport(Resource):
     def get(self, client_id):
@@ -37,15 +37,10 @@ class GenerateReport(Resource):
         stats = {
             "total_incidents": len(incident),
             "total_open_incidents": len([i for i in incident if i["status"] == "OPEN"]),
-            "total_closed_incidents": len([i for i in incident if i["status"] == "CLOSED"]),
+            "total_closed_incidents": len(
+                [i for i in incident if i["status"] == "CLOSED"]
+            ),
             "average_resolution_time": f"{random.randint(1, 100)} days",
         }
 
         return {"client": client, "incidents": incident, "stats": stats}, 200
-
-
-        
-        
-
-        
-
