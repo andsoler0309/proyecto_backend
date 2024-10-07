@@ -7,7 +7,9 @@ from flask import request, jsonify
 from models import db, Incident, IncidentSchema
 
 
-VIEW_360_BASE_URL = os.getenv("VIEW_360_BASE_URL", "http://localhost:5003")
+class Ping(Resource):
+    def get(self):
+        return {"status": "healthy"}
 
 
 class ReportView(Resource):
@@ -28,8 +30,3 @@ class ReportView(Resource):
             return {"error": "Internal Server Error"}, 500
 
         return {"report": "Reporte generado exitosamente"}, 200
-
-
-class Ping(Resource):
-    def get(self):
-        return {"status": "healthy"}

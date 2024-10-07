@@ -1,8 +1,10 @@
 name: Feature Workflow
+
 on:
   push:
     branches:
     - 'feature/**'
+
 jobs:
   job1:
     name: Pruebas de funcionalidad

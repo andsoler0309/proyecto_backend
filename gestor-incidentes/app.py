@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from models import db
-from views import IncidentList, IncidentDetail, Ping, GetIncidentsByUser
+from views import *
 from flask_migrate import Migrate
 from flask_cors import CORS
 import os
@@ -27,7 +27,9 @@ def create_app():
     # Register API resources
     api.add_resource(IncidentList, "/incidents")
     api.add_resource(IncidentDetail, "/incidents/<string:incident_id>")
+    api.add_resource(GetIncidentsByAgentId, "/incidents/agent/<string:agent_id>")
     api.add_resource(GetIncidentsByUser, "/incidents/user/<string:user_id>")
+    api.add_resource(GetIncidentsByClient, "/incidents/client/<string:client_id>")
     api.add_resource(Ping, "/gestor-incidentes/ping")
 
     return app

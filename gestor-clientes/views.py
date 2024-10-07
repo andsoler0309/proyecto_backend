@@ -3,10 +3,11 @@ from flask_restful import Resource
 from flask import request
 from models import db, Client, Plan
 from sqlalchemy.exc import IntegrityError
-from schemas import ClientSchema, PlanSchema
+from schemas import ClientSchema, PlanSchema, ClientPlanSchema
 
 client_schema = ClientSchema()
 plan_schema = PlanSchema()
+client_plan_schema = ClientPlanSchema()
 
 
 class ClientRegistration(Resource):
@@ -52,6 +53,46 @@ class ClientLogin(Resource):
             return {"msg": "Bad username or password"}, 401
 
         return client_schema.dump(client), 200
+
+
+class ClientDetail(Resource):
+    def get(self, client_id):
+        client = Client.query.get(client_id)
+        if not client:
+            return {"msg": "Client not found"}, 404
+        return client_schema.dump(client), 200
+
+    def put(self, client_id):
+        client = Client.query.get(client_id)
+        if not client:
+            return {"msg": "Client not found"}, 404
+
+        data = request.get_json()
+        try:
+            client.name = data["name"]
+            client.email = data["email"]
+            client.company_name = data["company_name"]
+        except KeyError as e:
+            return {"msg": f"Missing required field: {str(e)}"}, 400
+
+        db.session.add(client)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return {"msg": "Error updating client"}, 500
+
+        return client_schema.dump(client), 200
+
+    def delete(self, client_id):
+        client = Client.query.get(client_id)
+        if not client:
+            return {"msg": "Client not found"}, 404
+
+        db.session.delete(client)
+        db.session.commit()
+
+        return {"msg": "Client deleted"}, 200
 
 
 class Plans(Resource):
@@ -118,20 +159,7 @@ class PlanDetail(Resource):
         return {"msg": "Plan deleted"}, 200
 
 
-class GetClientPlan(Resource):
-    def get(self, client_id):
-        client = Client.query.get(client_id)
-        if not client:
-            return {"msg": "Client not found"}, 404
-
-        plan = Plan.query.get(client.plan_id)
-        if not plan:
-            return {"msg": "Plan not found"}, 404
-
-        return plan_schema.dump(plan), 200
-
-
-class UpdateClientPlan(Resource):
+class ClientPlan(Resource):
     def put(self, client_id):
         client = Client.query.get(client_id)
         if not client:
@@ -152,6 +180,17 @@ class UpdateClientPlan(Resource):
         db.session.commit()
 
         return client_schema.dump(client), 200
+
+    def get(self, client_id):
+        client = Client.query.get(client_id)
+        if not client:
+            return {"msg": "Client not found"}, 404
+
+        plan = Plan.query.get(client.plan_id)
+        if not plan:
+            return {"msg": "Plan not found"}, 404
+
+        return client_plan_schema.dump(plan), 200
 
 
 class DeleteClientPlan(Resource):

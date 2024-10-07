@@ -5,6 +5,7 @@ from flask_restful import Api
 from config import Config
 from models import db
 from services.incidents import *
+from services.clients import *
 from views import *
 
 
@@ -49,8 +50,14 @@ def create_app():
         methods=["DELETE"],
     )
     api.add_resource(
+        UpdateIncident,
+        "/incidents/<string:incident_id>",
+        endpoint="update_incident",
+        methods=["PUT"],
+    )
+    api.add_resource(
         GetIncidentsByAgent,
-        "/incidents/agent/<string:agent_id>",
+        "/incidents",
         endpoint="get_incidents_by_agent",
         methods=["GET"],
     )
@@ -58,6 +65,12 @@ def create_app():
         GetIncidentsByUser,
         "/incidents/user/<string:user_id>",
         endpoint="get_incidents_by_user",
+        methods=["GET"],
+    )
+    api.add_resource(
+        GetIncidentsByClient,
+        "/incidents/client/<string:client_id>",
+        endpoint="get_incidents_by_client",
         methods=["GET"],
     )
     api.add_resource(
@@ -78,6 +91,48 @@ def create_app():
         "/admin/agents/<string:agent_id>/reset",
         endpoint="admin_reset_agent",
         methods=["POST"],
+    )
+    api.add_resource(
+        CreateClient,
+        "/clients/register",
+        endpoint="create_client",
+        methods=["POST"],
+    )
+    api.add_resource(
+        ClientLogin,
+        "/clients/login",
+        endpoint="client_login",
+        methods=["POST"],
+    )
+    api.add_resource(
+        GetClient,
+        "/clients/<string:client_id>",
+        endpoint="get_client",
+        methods=["GET"],
+    )
+    api.add_resource(
+        GetPlans,
+        "/plans",
+        endpoint="get_plans",
+        methods=["GET"],
+    )
+    api.add_resource(
+        UpdateClientPlan,
+        "/clients/<string:client_id>/plan",
+        endpoint="update_client_plan",
+        methods=["PUT"],
+    )
+    api.add_resource(
+        SelectClientPlan,
+        "/clients/<string:client_id>/plan/<string:plan_id>",
+        endpoint="select_client_plan",
+        methods=["POST"],
+    )
+    api.add_resource(
+        GetClientPlan,
+        "/clients/<string:client_id>/plan",
+        endpoint="get_client_plan",
+        methods=["GET"],
     )
 
     return app

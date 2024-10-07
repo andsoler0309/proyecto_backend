@@ -26,6 +26,18 @@ def generate_jwt(agent_id, session_id):
     return token
 
 
+def generate_jwt_client(client_id):
+    payload = {
+        "client_id": client_id,
+        "exp": datetime.datetime.utcnow()
+        + datetime.timedelta(seconds=Config.JWT_EXP_DELTA_SECONDS),
+        "iat": datetime.datetime.utcnow(),
+        "jti": str(uuid.uuid4()),
+    }
+    token = jwt.encode(payload, Config.JWT_SECRET, algorithm=Config.JWT_ALGORITHM)
+    return token
+
+
 def decode_jwt(token):
     try:
         payload = jwt.decode(
