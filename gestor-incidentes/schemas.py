@@ -6,7 +6,7 @@ from models import RegistrationMediumEnum, StatusEnum
 
 class IncidentSchema(Schema):
     id = fields.String(dump_only=True)
-    agent_id = fields.String(required=True, load_only=True)
+    agent_id = fields.String(required=False, load_only=True)
     agent_id_creation = fields.String(dump_only=True)
     description = fields.String(required=True)
     date = fields.Date(required=True)
@@ -21,7 +21,7 @@ class IncidentSchema(Schema):
 
 class IncidentUpdateSchema(Schema):
     id = fields.String(dump_only=True)
-    agent_id = fields.String(required=True, load_only=True)
+    agent_id = fields.String(required=False, load_only=True)
     agent_id_creation = fields.String(dump_only=True)
     description = fields.String(required=True)
     date = fields.Date(required=True)

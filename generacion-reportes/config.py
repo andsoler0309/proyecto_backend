@@ -12,5 +12,6 @@ class Config:
     GESTOR_CLIENTES_BASE_URL = (
         os.getenv("GESTOR_CLIENTES_BASE_URL") or "http://localhost:5003"
     )
+    SERVICIO_IA_BASE_URL = os.getenv("SERVICIO_IA_BASE_URL") or "http://localhost:5005"
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or "sqlite:///api_gateway.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
