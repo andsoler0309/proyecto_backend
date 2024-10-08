@@ -4,11 +4,15 @@ from models import db, Incident
 from schemas import IncidentSchema, IncidentUpdateSchema
 from sqlalchemy.exc import IntegrityError
 from models import RegistrationMediumEnum, StatusEnum
+import os
+import requests
 
 incident_schema = IncidentSchema()
 incidents_schema = IncidentSchema(many=True)
 
 incident_update_schema = IncidentUpdateSchema()
+
+SERVICIO_IA_BASE_URL = os.environ.get("SERVICIO_IA_BASE_URL", "http://localhost:5001")
 
 
 class IncidentList(Resource):
@@ -24,20 +28,25 @@ class IncidentList(Resource):
             registration_medium_enum = RegistrationMediumEnum(registration_medium)
         except ValueError:
             return {"msg": "Invalid registration medium"}, 400
+        
 
-        agent_id = incident_data["agent_id"]
-        if not agent_id:
-            return {"msg": "Agent ID is required"}, 400
+        if registration_medium_enum is not RegistrationMediumEnum.CHAT:
+            if "agent_id" not in incident_data:
+                return {"msg": "Agent ID is required"}, 400
+
 
         incident = Incident(
             description=incident_data["description"],
             date=incident_data["date"],
             registration_medium=registration_medium_enum,
             user_id=incident_data["user_id"],
-            agent_id_creation=incident_data["agent_id"],
-            agent_id_last_update=incident_data["agent_id"],
             client_id=incident_data["client_id"],
         )
+
+        if "agent_id" in incident_data:
+            incident.agent_id_creation = incident_data["agent_id"]
+            incident.agent_id_last_update = incident_data["agent_id"]
+
         db.session.add(incident)
         try:
             db.session.commit()
@@ -119,6 +128,26 @@ class GetIncidentsByClient(Resource):
     def get(self, client_id):
         incidents = Incident.query.filter_by(client_id=client_id).all()
         return incidents_schema.dump(incidents), 200
+
+
+class GetIncidentPossibleSolution(Resource):
+    def get(self, incident_id):
+        incident = Incident.query.get(incident_id)
+        if not incident:
+            return {"msg": "Incident not found"}, 404
+
+        incident_data = incident_schema.dump(incident)
+        incident_description = incident_data["description"]
+
+        try:
+            response = requests.get(
+                f"{SERVICIO_IA_BASE_URL}/incident/{incident_id}",
+                timeout=5,
+            )
+        except requests.exceptions.RequestException as e:
+            return {"msg": "Error communicating with IA Service"}, 503
+
+        return response.json(), response.status_code
 
 
 class Ping(Resource):

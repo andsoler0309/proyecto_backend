@@ -129,7 +129,7 @@ class UpdateIncident(Resource):
 
 
 class GetIncidentDetail(Resource):
-    def get(self, current_agent, incident_id):
+    def get(self, incident_id):
         try:
             incident_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
@@ -142,17 +142,11 @@ class GetIncidentDetail(Resource):
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
 
-        if (
-            incident["agent_id_creation"] != current_agent["id"]
-            or incident["agent_id_last_update"] != current_agent["id"]
-        ) and current_agent["role"] != "admin":
-            return {"msg": "Unauthorized to view this incident"}, 403
-
         return incident, 200
 
 
 class GetIncidentsByUser(Resource):
-    def get(self, current_agent, user_id):
+    def get(self, user_id):
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/user/{user_id}",
@@ -169,9 +163,7 @@ class GetIncidentsByUser(Resource):
 
 
 class GetIncidentsByAgent(Resource):
-    def get(self, current_agent):
-        agent_id = current_agent["id"]
-
+    def get(self, agent_id):
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/agent/{agent_id}",
@@ -203,3 +195,20 @@ class GetIncidentsByClient(Resource):
             return {"msg": "Error communicating with Incidents Service"}, 503
 
         return incidents, 200
+
+
+class GetIncidentPossibleSolution(Resource): 
+    def get(self, incident_id):
+        try:
+            solution_response = requests.get(
+                f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}/solution",
+                timeout=5,
+            )
+            if solution_response.status_code != 200:
+                return solution_response.json(), solution_response.status_code
+            solution = solution_response.json()
+        except requests.exceptions.RequestException as e:
+            current_app.logger.error(f"Error communicating with Incidents Service: {e}")
+            return {"msg": "Error communicating with Incidents Service"}, 503
+
+        return solution, 200

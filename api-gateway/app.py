@@ -59,7 +59,7 @@ def create_app():
     )
     api.add_resource(
         GetIncidentsByAgent,
-        "/incidents",
+        "/incidents/agent/<string:agent_id>",
         endpoint="get_incidents_by_agent",
         methods=["GET"],
     )
@@ -147,6 +147,12 @@ def create_app():
         "/reports/<string:client_id>",
         endpoint="get_report_from_client",
         methods=["POST"],
+    )
+    api.add_resource(
+        GetIncidentPossibleSolution,
+        "/incidents/<string:incident_id>/solution",
+        endpoint="get_incident_possible_solution",
+        methods=["GET"],
     )
 
     return app

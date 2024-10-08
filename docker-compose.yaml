@@ -140,6 +140,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
       - VIEW_360_BASE_URL=http://vista-360:5000
+      - SERVICIO_IA_BASE_URL=http://servicio-ia:5000
     networks:
       - incidentes-net
       - abcall-net
@@ -155,8 +156,13 @@ services:
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GESTOR_INCIDENTES_BASE_URL=http://gestor-incidentes:5000
+      - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
     networks:
       - abcall-net
+      - usuarios-net
+    depends_on:
+      usuarios-db:
+        condition: service_healthy
 
   # gestor-fidelizacion:
   #   build:

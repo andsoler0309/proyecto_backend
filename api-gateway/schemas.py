@@ -106,5 +106,5 @@ class ClientPlanSchema(Schema):
 
 
 class ChatBotSchema(Schema):
-    user_id = fields.Int(required=False)
     message = fields.Str(required=True)
+    chatbot_conversation_id = fields.Str(required=False)
