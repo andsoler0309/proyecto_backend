@@ -26,7 +26,7 @@ class Incident(db.Model):
         unique=True,
         nullable=False,
     )
-    agent_id_creation = db.Column(db.String(36), nullable=False)
+    agent_id_creation = db.Column(db.String(36), nullable=True)
     description = db.Column(db.Text, nullable=False)
     date = db.Column(db.Date, nullable=False)
     registration_medium = db.Column(db.Enum(RegistrationMediumEnum), nullable=False)

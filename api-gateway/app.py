@@ -6,6 +6,7 @@ from config import Config
 from models import db
 from services.incidents import *
 from services.clients import *
+from services.ia_service import *
 from services.reports import *
 from views import *
 
@@ -135,6 +136,12 @@ def create_app():
         endpoint="get_client_plan",
         methods=["GET"],
     )
+    api.add_resource(
+        ChatBot,
+        "/chatbot",
+        endpoint="chatbot",
+        methods=["POST"],
+    )    
     api.add_resource(
         GetReportFromClient,
         "/reports/<string:client_id>",

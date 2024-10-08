@@ -103,3 +103,8 @@ class ClientPlanSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     plan_id = fields.Str(required=True)
     plan = fields.Nested(PlanSchema, dump_only=True)
+
+
+class ChatBotSchema(Schema):
+    user_id = fields.Int(required=False)
+    message = fields.Str(required=True)
