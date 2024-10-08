@@ -51,6 +51,10 @@ class GenerateReport(Resource):
 
         if ia_response.status_code != 200:
             return ia_response.json(), ia_response.status_code
-        
 
-        return {"client": client, "incidents": incident, "stats": stats, "ia_response": ia_response.json()}, 200
+        return {
+            "client": client,
+            "incidents": incident,
+            "stats": stats,
+            "ia_response": ia_response.json(),
+        }, 200

@@ -28,12 +28,10 @@ class IncidentList(Resource):
             registration_medium_enum = RegistrationMediumEnum(registration_medium)
         except ValueError:
             return {"msg": "Invalid registration medium"}, 400
-        
 
         if registration_medium_enum is not RegistrationMediumEnum.CHAT:
             if "agent_id" not in incident_data:
                 return {"msg": "Agent ID is required"}, 400
-
 
         incident = Incident(
             description=incident_data["description"],

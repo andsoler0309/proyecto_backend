@@ -12,5 +12,3 @@ class ChatbotConversationSchema(Schema):
     updated_at = fields.DateTime(dump_only=True)
     client_id = fields.String(required=False)
     incident_description = fields.String(required=False)
-
-

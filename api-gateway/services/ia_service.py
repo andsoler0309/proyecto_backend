@@ -7,6 +7,7 @@ from schemas import ChatBotSchema
 
 chat_bot_schema = ChatBotSchema()
 
+
 class ChatBot(Resource):
     def post(self):
         data = request.get_json()
@@ -14,7 +15,7 @@ class ChatBot(Resource):
             validated_data = chat_bot_schema.load(data)
         except ValidationError as err:
             return {"msg": "Invalid data", "errors": err.messages}, 400
-        
+
         try:
             chat_bot_response = requests.post(
                 f"{Config.SERVICIO_IA_BASE_URL}/chatbot",
@@ -27,6 +28,5 @@ class ChatBot(Resource):
 
         if chat_bot_response.status_code != 200:
             return chat_bot_response.json(), chat_bot_response.status_code
-        
-        return chat_bot_response.json(), 200
 
+        return chat_bot_response.json(), 200

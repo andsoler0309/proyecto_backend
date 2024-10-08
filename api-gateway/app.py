@@ -141,7 +141,7 @@ def create_app():
         "/chatbot",
         endpoint="chatbot",
         methods=["POST"],
-    )    
+    )
     api.add_resource(
         GetReportFromClient,
         "/reports/<string:client_id>",

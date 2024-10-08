@@ -30,7 +30,9 @@ def create_app():
     api.add_resource(GetIncidentsByAgentId, "/incidents/agent/<string:agent_id>")
     api.add_resource(GetIncidentsByUser, "/incidents/user/<string:user_id>")
     api.add_resource(GetIncidentsByClient, "/incidents/client/<string:client_id>")
-    api.add_resource(GetIncidentPossibleSolution, "/incidents/<string:incident_id>/solution")
+    api.add_resource(
+        GetIncidentPossibleSolution, "/incidents/<string:incident_id>/solution"
+    )
     api.add_resource(Ping, "/gestor-incidentes/ping")
 
     return app

@@ -6,15 +6,15 @@ db = SQLAlchemy()
 
 
 class ChatbotState(Enum):
-    WELCOME = 'welcome'
-    DESCRIPTION = 'description'
-    USER_ID = 'user_id'
-    CONFIRM = 'confirm'
-    COMPANY_NAME_SELECTION = 'company_name_selection'
+    WELCOME = "welcome"
+    DESCRIPTION = "description"
+    USER_ID = "user_id"
+    CONFIRM = "confirm"
+    COMPANY_NAME_SELECTION = "company_name_selection"
 
 
 class ChatbotConversation(db.Model):
-    __tablename__ = 'chatbot_conversations'
+    __tablename__ = "chatbot_conversations"
 
     id = db.Column(
         db.String(36),
@@ -31,11 +31,10 @@ class ChatbotConversation(db.Model):
     )
     client_id = db.Column(db.String(36), nullable=True)
     incident_description = db.Column(db.Text, nullable=True)
-    
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'state': self.state.value,
+            "id": self.id,
+            "user_id": self.user_id,
+            "state": self.state.value,
         }

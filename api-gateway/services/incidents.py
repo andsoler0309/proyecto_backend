@@ -197,7 +197,7 @@ class GetIncidentsByClient(Resource):
         return incidents, 200
 
 
-class GetIncidentPossibleSolution(Resource): 
+class GetIncidentPossibleSolution(Resource):
     def get(self, incident_id):
         try:
             solution_response = requests.get(
