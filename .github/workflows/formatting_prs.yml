@@ -52,6 +52,12 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
           pytest
+      - name: Validar resultado con errores
+        if: ${{ failure() }}
+        run: echo "Una o varias pruebas fallaron"
+      - name: Validar resultado sin errores
+        if: ${{ success() }}
+        run: echo "Todas las pruebas fueron exitosas"
 
   tests_generacion_reportes:
     name: Pruebas para generacion-reportes
@@ -70,3 +76,9 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
           pytest
+      - name: Validar resultado con errores
+        if: ${{ failure() }}
+        run: echo "Una o varias pruebas fallaron"
+      - name: Validar resultado sin errores
+        if: ${{ success() }}
+        run: echo "Todas las pruebas fueron exitosas"
