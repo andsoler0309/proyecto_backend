@@ -1,6 +1,9 @@
 name: Prueba de Autenticación con GCP
 
-on: [push]
+on:
+  push:
+    branches:
+    - 'deployment/**'
 
 jobs:
   test-auth:
