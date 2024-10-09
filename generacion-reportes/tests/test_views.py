@@ -13,11 +13,13 @@ def test_generate_report_success(client_generacion_reportes):
     client_id = "client123"
 
     # Mock de los datos de incidentes
-    incident_data = [{
-        "incident_id": "incident123",
-        "agent_id": "agent123",
-        "status": "OPEN",
-    }]
+    incident_data = [
+        {
+            "incident_id": "incident123",
+            "agent_id": "agent123",
+            "status": "OPEN",
+        }
+    ]
 
     # Mock de los datos del cliente
     client_data = {"id": client_id, "name": "Test Client"}
@@ -25,7 +27,9 @@ def test_generate_report_success(client_generacion_reportes):
     # Mock de la respuesta del servicio IA
     ia_data = {"analysis": "Análisis de ejemplo"}
 
-    with patch("requests.get") as mock_requests_get, patch("requests.post") as mock_post:
+    with patch("requests.get") as mock_requests_get, patch(
+        "requests.post"
+    ) as mock_post:
 
         mock_requests_get.return_value.status_code = 200
         mock_requests_get.return_value.json.return_value = client_data
@@ -67,6 +71,7 @@ def test_generate_report_incident_service_failure(client_generacion_reportes):
         response = client_generacion_reportes.get(f"/reports/{client_id}")
         assert response.status_code == 500
         assert response.get_json() == {"error": "Internal Server Error"}
+
 
 # Función auxiliar para crear una respuesta mock
 def create_mock_response(status_code, json_data):
