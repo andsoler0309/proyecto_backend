@@ -82,3 +82,27 @@ jobs:
       - name: Validar resultado sin errores
         if: ${{ success() }}
         run: echo "Todas las pruebas fueron exitosas"
+
+  tests_gestor_agentes:
+    name: Pruebas para gestor-agentes
+    runs-on: ubuntu-latest
+    needs: formatting
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v2
+      - name: Configuración del entorno de Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Ejecutar pruebas
+        working-directory: gestor-agentes
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+          pytest
+      - name: Validar resultado con errores
+        if: ${{ failure() }}
+        run: echo "Una o varias pruebas fallaron"
+      - name: Validar resultado sin errores
+        if: ${{ success() }}
+        run: echo "Todas las pruebas fueron exitosas"
