@@ -18,6 +18,7 @@ class Config:
     GENERACION_REPORTES_BASE_URL = (
         os.getenv("GENERACION_REPORTES_BASE_URL") or "http://localhost:5004"
     )
+    SERVICIO_IA_BASE_URL = os.getenv("SERVICIO_IA_BASE_URL") or "http://localhost:5005"
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or "your_openai_api_key"
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or "sqlite:///api_gateway.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False

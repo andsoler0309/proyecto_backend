@@ -43,4 +43,18 @@ class GenerateReport(Resource):
             "average_resolution_time": f"{random.randint(1, 100)} days",
         }
 
-        return {"client": client, "incidents": incident, "stats": stats}, 200
+        # get the ia response from data
+        ia_response = requests.post(
+            f"{Config.SERVICIO_IA_BASE_URL}/report/{client_id}",
+            timeout=5,
+        )
+
+        if ia_response.status_code != 200:
+            return ia_response.json(), ia_response.status_code
+
+        return {
+            "client": client,
+            "incidents": incident,
+            "stats": stats,
+            "ia_response": ia_response.json(),
+        }, 200

@@ -1,9 +1,8 @@
 from flask import Flask
 from flask_restful import Api
-from models import db
 from views import *
-from flask_migrate import Migrate
 from flask_cors import CORS
+from models import db
 import os
 
 
@@ -17,7 +16,6 @@ def create_app():
     app_context.push()
 
     db.init_app(app)
-    migrate = Migrate(app, db)
     db.create_all()
 
     cors = CORS(app, resources={r"/*": {"origins": "*"}})
@@ -25,15 +23,10 @@ def create_app():
     api = Api(app)
 
     # Register API resources
-    api.add_resource(IncidentList, "/incidents")
-    api.add_resource(IncidentDetail, "/incidents/<string:incident_id>")
-    api.add_resource(GetIncidentsByAgentId, "/incidents/agent/<string:agent_id>")
-    api.add_resource(GetIncidentsByUser, "/incidents/user/<string:user_id>")
-    api.add_resource(GetIncidentsByClient, "/incidents/client/<string:client_id>")
-    api.add_resource(
-        GetIncidentPossibleSolution, "/incidents/<string:incident_id>/solution"
-    )
-    api.add_resource(Ping, "/gestor-incidentes/ping")
+    api.add_resource(Ping, "/servicio-ia/ping")
+    api.add_resource(Chatbot, "/chatbot")
+    api.add_resource(Report, "/report/<string:client_id>")
+    api.add_resource(Incident, "/incident/<string:incident_id>")
 
     return app
 

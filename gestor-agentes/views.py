@@ -74,7 +74,6 @@ class AgentLogin(Resource):
             return {"msg": "Email and password are required"}, 400
 
         agent = Agent.query.filter_by(email=email).first()
-
         if not agent or not agent.check_password(password):
             return {"msg": "Bad username or password"}, 401
 

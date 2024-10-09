@@ -90,6 +90,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - EMAIL_ADDRESS=${EMAIL_ADDRESS}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - SERVICIO_IA_BASE_URL=http://servicio-ia:5000
     networks:
       - usuarios-net
       - abcall-net
@@ -123,6 +124,7 @@ services:
       - GESTOR_INCIDENTES_BASE_URL=http://gestor-incidentes:5000
       - GESTOR_CLIENTES_BASE_URL=http://gestor-clientes:5000
       - GESTOR_AGENTES_BASE_URL=http://gestor-agentes:5000
+      - SERVICIO_IA_BASE_URL=http://servicio-ia:5000
     networks:
       - incidentes-net
       - abcall-net
@@ -138,11 +140,28 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
       - VIEW_360_BASE_URL=http://vista-360:5000
+      - SERVICIO_IA_BASE_URL=http://servicio-ia:5000
     networks:
       - incidentes-net
       - abcall-net
     depends_on:
       incidentes-db:
+        condition: service_healthy
+
+  servicio-ia:
+    build:
+      context: ./servicio-ia
+    ports:
+      - "5007:5000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GESTOR_INCIDENTES_BASE_URL=http://gestor-incidentes:5000
+      - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
+    networks:
+      - abcall-net
+      - usuarios-net
+    depends_on:
+      usuarios-db:
         condition: service_healthy
 
   # gestor-fidelizacion:

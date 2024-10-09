@@ -24,7 +24,7 @@ def create_app():
 
     # Register API resources
     api.add_resource(GenerateReport, "/reports/<string:client_id>")
-    api.add_resource(Ping, "/gestor-incidentes/ping")
+    api.add_resource(Ping, "/generacion-reportes/ping")
 
     return app
 
