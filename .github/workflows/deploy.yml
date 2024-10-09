@@ -29,10 +29,10 @@ jobs:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         install_components: 'gke-gcloud-auth-plugin'
 
-    - name: Configurar kubectl
-      run: |
-        gcloud components install kubectl
-        gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
+    # - name: Configurar kubectl
+    #   run: |
+    #     gcloud components install kubectl
+    #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Configurar Docker para Artifact Registry
       run: |
