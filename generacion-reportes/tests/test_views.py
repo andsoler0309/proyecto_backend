@@ -4,9 +4,9 @@ from flask import url_for
 
 
 def test_ping(client_generacion_reportes):
-    response = client_generacion_reportes.get('/generacion-reportes/ping')
+    response = client_generacion_reportes.get("/generacion-reportes/ping")
     assert response.status_code == 200
-    assert response.get_json() == {'status': 'healthy'}
+    assert response.get_json() == {"status": "healthy"}
 
 
 def test_generate_report_success(client_generacion_reportes):
