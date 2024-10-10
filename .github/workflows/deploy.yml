@@ -1,14 +1,14 @@
 name: CI/CD para despliegue en GKE
 
-# on:
-#   push:
-#     branches:
-#       - main
-
 on:
   push:
     branches:
-    - 'deployment/**'
+      - main
+
+# on:
+#   push:
+#     branches:
+#     - 'deployment/**'
 
 jobs:
   deploy:
@@ -80,7 +80,7 @@ jobs:
 
     # - name: Desplegar en GKE
     #   run: |
-    #     kubectl apply -f deployment/
+    #     kubectl apply -f deployment/k8s-deployment-app.yaml
 
     # - name: Verificar el estado de los pods
     #   run: |
