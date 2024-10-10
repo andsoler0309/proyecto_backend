@@ -140,7 +140,6 @@ class UpdateClientPlan(Resource):
     @client_required
     def put(self, current_client, client_id):
         data = request.get_json()
-        print(data)
         try:
             validated_data = client_plan_schema.load(data)
         except ValidationError as err:

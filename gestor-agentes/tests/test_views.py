@@ -1,5 +1,3 @@
-# tests/test_resources.py
-
 import pytest
 from unittest.mock import MagicMock, patch
 from models import Agent, UserRole
