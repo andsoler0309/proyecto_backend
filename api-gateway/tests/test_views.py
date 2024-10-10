@@ -3,6 +3,7 @@ import requests
 from config import Config
 import datetime
 
+
 def test_ping(client):
     response = client.get("/api-gateway/ping")
     assert response.status_code == 200
@@ -114,9 +115,7 @@ def test_login_invalid_agent_data(client):
     data = {"email": "test@example.com", "password": "password123"}
     with patch("requests.post") as mock_post:
         mock_post.return_value.status_code = 200
-        mock_post.return_value.json.return_value = {
-            "is_locked": False  # Falta 'id'
-        }
+        mock_post.return_value.json.return_value = {"is_locked": False}  # Falta 'id'
         response = client.post("/agents/login", json=data)
         assert response.status_code == 500
         assert response.get_json()["msg"] == "Invalid agent data received"
@@ -233,7 +232,11 @@ def test_verify_security_answer_error_fetching_incidents(client):
         mock_get_1 = MagicMock()
         mock_get_1.status_code = 200
         mock_get_1._content = '{"id": "agent-id", "is_locked": false, "role": "agent"}'
-        mock_get_1.json.return_value = {"id": "agent-id", "is_locked": False, "role": "agent"}
+        mock_get_1.json.return_value = {
+            "id": "agent-id",
+            "is_locked": False,
+            "role": "agent",
+        }
 
         mock_get_2 = MagicMock()
         mock_get_2.status_code = 500
@@ -268,7 +271,9 @@ def test_logout_invalid_token(client):
 def test_delete_agent_communication_error(client):
     agent_id = "agent-id"
     with patch("requests.delete") as mock_delete:
-        mock_delete.side_effect = requests.exceptions.RequestException("Connection error")
+        mock_delete.side_effect = requests.exceptions.RequestException(
+            "Connection error"
+        )
         response = client.delete(f"/agents/{agent_id}")
         assert response.status_code == 503
         assert response.get_json()["msg"] == "Error communicating with Gestor-Agente"
@@ -282,4 +287,3 @@ def test_delete_agent_error_from_gestor(client):
         response = client.delete(f"/agents/{agent_id}")
         assert response.status_code == 404
         assert response.get_json()["msg"] == "Agent not found"
-

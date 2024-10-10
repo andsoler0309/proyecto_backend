@@ -12,7 +12,10 @@ def test_create_client_success(client):
     with patch("requests.post") as mock_post:
         # Mock successful response from Clients service
         mock_post.return_value.status_code = 201
-        mock_post.return_value.json.return_value = {"msg": "Client created", "id": "client123"}
+        mock_post.return_value.json.return_value = {
+            "msg": "Client created",
+            "id": "client123",
+        }
 
         response = client.post("/clients/register", json=data)
         assert response.status_code == 201
@@ -42,8 +45,9 @@ def test_create_client_invalid_data(client):
 
 def test_client_login_success(client):
     data = {"email": "test.client@example.com", "password": "password123"}
-    with patch("services.clients.requests.post") as mock_post, \
-         patch("services.clients.generate_jwt_client") as mock_generate_jwt_client:
+    with patch("services.clients.requests.post") as mock_post, patch(
+        "services.clients.generate_jwt_client"
+    ) as mock_generate_jwt_client:
         # Mock successful response from Clients service
         mock_post.return_value.status_code = 200
         mock_post.return_value.json.return_value = {"id": "client123"}
@@ -78,9 +82,11 @@ def test_client_login_invalid_data(client):
 def test_get_client_success(client):
     client_id = "client123"
     token = "valid_token"
-    with patch("auth.decode_jwt") as mock_decode_jwt, \
-         patch("auth.is_token_blacklisted") as mock_is_token_blacklisted, \
-         patch("services.clients.requests.get") as mock_requests_get:
+    with patch("auth.decode_jwt") as mock_decode_jwt, patch(
+        "auth.is_token_blacklisted"
+    ) as mock_is_token_blacklisted, patch(
+        "services.clients.requests.get"
+    ) as mock_requests_get:
         # Mock authentication
         mock_decode_jwt.return_value = {"client_id": client_id}
         mock_is_token_blacklisted.return_value = False
@@ -110,9 +116,9 @@ def test_update_client_plan_success(client):
         "company_name": "Test Company",
         "name": "Test Client",
     }
-    with patch("auth.decode_jwt") as mock_decode_jwt, \
-         patch("auth.is_token_blacklisted") as mock_is_token_blacklisted, \
-         patch("services.clients.requests.put") as mock_put:
+    with patch("auth.decode_jwt") as mock_decode_jwt, patch(
+        "auth.is_token_blacklisted"
+    ) as mock_is_token_blacklisted, patch("services.clients.requests.put") as mock_put:
         # Mock authentication
         mock_decode_jwt.return_value = {"client_id": client_id}
         mock_is_token_blacklisted.return_value = False
@@ -121,29 +127,37 @@ def test_update_client_plan_success(client):
         mock_put.return_value.status_code = 200
         mock_put.return_value.json.return_value = {
             "msg": "Client plan updated",
-            "plan_id": "plan456"
+            "plan_id": "plan456",
         }
 
         headers = {"Authorization": f"Bearer {token}"}
         response = client.put(f"/clients/{client_id}/plan", json=data, headers=headers)
         assert response.status_code == 200
-        assert response.get_json() == {"msg": "Client plan updated", "plan_id": "plan456"}
+        assert response.get_json() == {
+            "msg": "Client plan updated",
+            "plan_id": "plan456",
+        }
 
 
 def test_select_client_plan_success(client):
     client_id = "client123"
     plan_id = "plan456"
     token = "valid_token"
-    with patch("auth.decode_jwt") as mock_decode_jwt, \
-         patch("auth.is_token_blacklisted") as mock_is_token_blacklisted, \
-         patch("services.clients.requests.post") as mock_post:
+    with patch("auth.decode_jwt") as mock_decode_jwt, patch(
+        "auth.is_token_blacklisted"
+    ) as mock_is_token_blacklisted, patch(
+        "services.clients.requests.post"
+    ) as mock_post:
         # Mock authentication
         mock_decode_jwt.return_value = {"client_id": client_id}
         mock_is_token_blacklisted.return_value = False
 
         # Mock successful response from Clients service
         mock_post.return_value.status_code = 200
-        mock_post.return_value.json.return_value = {"msg": "Plan selected", "plan_id": plan_id}
+        mock_post.return_value.json.return_value = {
+            "msg": "Plan selected",
+            "plan_id": plan_id,
+        }
 
         headers = {"Authorization": f"Bearer {token}"}
         response = client.post(f"/clients/{client_id}/plan/{plan_id}", headers=headers)
@@ -170,9 +184,9 @@ def test_select_client_plan_success(client):
 
 def test_get_plans_success(client):
     token = "valid_token"
-    with patch("auth.decode_jwt") as mock_decode_jwt, \
-         patch("auth.is_token_blacklisted") as mock_is_token_blacklisted, \
-         patch("services.clients.requests.get") as mock_get:
+    with patch("auth.decode_jwt") as mock_decode_jwt, patch(
+        "auth.is_token_blacklisted"
+    ) as mock_is_token_blacklisted, patch("services.clients.requests.get") as mock_get:
         # Mock authentication
         mock_decode_jwt.return_value = {"client_id": "client123"}
         mock_is_token_blacklisted.return_value = False
