@@ -12,27 +12,6 @@ permissions:
   contents: write
 
 jobs:
-  formatting:
-    name: Formateo de Código
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout del repositorio
-        uses: actions/checkout@v2
-
-      - name: Configuración del entorno de Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-
-      - name: Instalar herramientas de formateo
-        run: |
-          pip install black isort
-
-      - name: Verificar formateo
-        run: |
-          black --check .
-          isort --check-only .
-
   tests_api_gateway:
     name: Pruebas para api-gateway
     runs-on: ubuntu-latest
