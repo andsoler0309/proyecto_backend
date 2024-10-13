@@ -223,6 +223,20 @@ class SelectClientPlan(Resource):
         return client_schema.dump(client), 200
 
 
+class ClientsByPlan(Resource):
+    def get(self, plan_id):
+        if not Plan.query.get(plan_id):
+            return {"msg": "Plan not found"}, 404
+        clients = Client.query.filter_by(plan_id=plan_id).all()
+        return client_schema.dump(clients, many=True), 200
+
+
+class Clients(Resource):
+    def get(self):
+        clients = Client.query.all()
+        return client_schema.dump(clients, many=True), 200
+
+
 class Ping(Resource):
     def get(self):
         return {"status": "healthy"}, 200

@@ -1,40 +1,9 @@
-name: formatting on PRs
+name: Release
 on:
-  pull_request:
-    types: 
-      - labeled
-      - unlabeled
-      - synchronize
-      - opened
-      - edited
-      - ready_for_review
-      - reopened
-      - unlocked
-    branches: [develop]
-
-permissions:
-  contents: write
-
-jobs:
-  formatting:
-    name: Formateo de código
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout del repositorio
-        uses: actions/checkout@v2
-      - name: Configuración del entorno de Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-      - name: Instalar Black
-        run: pip install black
-      - name: Formateo de código con Black
-        run: black .
-      - name: Commit de los resultados de Black
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Formateo automático de código en PRs"
-
+  push:
+    branches: 
+      - 'release**'
+jobs:    
   tests_api_gateway:
     name: Pruebas para api-gateway
     runs-on: ubuntu-latest
@@ -131,3 +100,44 @@ jobs:
       - name: Validar resultado sin errores
         if: ${{ success() }}
         run: echo "Todas las pruebas fueron exitosas"
+
+  automerge:
+    name: Automerge
+    needs: 
+      - tests_api_gateway
+      - tests_generacion_reportes
+      - tests_gestor_agentes
+      - tests_gestor_incidentes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+          body: |
+            Changes in this Release
+            - First Change
+            - Second Change
+          draft: false
+          prerelease: false
+      - name: automerge
+        uses: "pascalgn/automerge-action@4536e8847eb62fe2f0ee52c8fa92d17aa97f932f"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MERGE_LABELS: ""
+      - name: merge with develop
+        uses: tukasz/direct-merge-action@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: releases/${{ github.ref }}
+          target-branch: develop
+      - name: merge with main
+        uses: tukasz/direct-merge-action@master
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          source-branch: releases/${{ github.ref }}
+          target-branch: main
