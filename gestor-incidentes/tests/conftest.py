@@ -25,11 +25,11 @@ def mock_db_session():
 # Mock the models and queries
 @pytest.fixture(autouse=True)
 def mock_models():
-    with patch("models.Agent") as MockAgent:
+    with patch("models.Incident") as MockAgent:
         yield MockAgent
 
 
 @pytest.fixture(autouse=True)
 def mock_views():
-    with patch("views.Agent") as MockAgent:
+    with patch("views.Incident") as MockAgent:
         yield MockAgent
