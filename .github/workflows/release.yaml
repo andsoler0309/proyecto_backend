@@ -1,9 +1,38 @@
-name: Release
+name: CI/CD Pipeline
+
 on:
   push:
-    branches: 
-      - 'release**'
-jobs:    
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  formatting:
+    name: Formateo de Código
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v2
+
+      - name: Configuración del entorno de Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Instalar herramientas de formateo
+        run: |
+          pip install black isort
+
+      - name: Verificar formateo
+        run: |
+          black --check .
+          isort --check-only .
+
   tests_api_gateway:
     name: Pruebas para api-gateway
     runs-on: ubuntu-latest
@@ -11,19 +40,23 @@ jobs:
     steps:
       - name: Checkout del repositorio
         uses: actions/checkout@v2
+
       - name: Configuración del entorno de Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+
       - name: Ejecutar pruebas
         working-directory: api-gateway
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov
           pytest
+
       - name: Validar resultado con errores
         if: ${{ failure() }}
         run: echo "Una o varias pruebas fallaron"
+
       - name: Validar resultado sin errores
         if: ${{ success() }}
         run: echo "Todas las pruebas fueron exitosas"
@@ -35,19 +68,23 @@ jobs:
     steps:
       - name: Checkout del repositorio
         uses: actions/checkout@v2
+
       - name: Configuración del entorno de Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+
       - name: Ejecutar pruebas
         working-directory: generacion-reportes
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov
           pytest
+
       - name: Validar resultado con errores
         if: ${{ failure() }}
         run: echo "Una o varias pruebas fallaron"
+
       - name: Validar resultado sin errores
         if: ${{ success() }}
         run: echo "Todas las pruebas fueron exitosas"
@@ -59,23 +96,26 @@ jobs:
     steps:
       - name: Checkout del repositorio
         uses: actions/checkout@v2
+
       - name: Configuración del entorno de Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+
       - name: Ejecutar pruebas
         working-directory: gestor-agentes
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov
           pytest
+
       - name: Validar resultado con errores
         if: ${{ failure() }}
         run: echo "Una o varias pruebas fallaron"
+
       - name: Validar resultado sin errores
         if: ${{ success() }}
         run: echo "Todas las pruebas fueron exitosas"
-
 
   tests_gestor_incidentes:
     name: Pruebas para gestor-incidentes
@@ -84,60 +124,78 @@ jobs:
     steps:
       - name: Checkout del repositorio
         uses: actions/checkout@v2
+
       - name: Configuración del entorno de Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+
       - name: Ejecutar pruebas
         working-directory: gestor-incidentes
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov
           pytest
+
       - name: Validar resultado con errores
         if: ${{ failure() }}
         run: echo "Una o varias pruebas fallaron"
+
       - name: Validar resultado sin errores
         if: ${{ success() }}
         run: echo "Todas las pruebas fueron exitosas"
 
-  automerge:
-    name: Automerge
-    needs: 
+  create_release:
+    name: Crear Tag y Release
+    runs-on: ubuntu-latest
+    needs:
       - tests_api_gateway
       - tests_generacion_reportes
       - tests_gestor_agentes
       - tests_gestor_incidentes
-    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Create Release
-        id: create_release
+      - name: Checkout del repositorio
+        uses: actions/checkout@v2
+
+      - name: Obtener información del PR
+        id: pr
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: 'develop',
+              base: 'main',
+              state: 'closed',
+            });
+            const mergedPR = pr.data.find(p => p.merged);
+            if (!mergedPR) {
+              throw new Error('No se encontró un PR fusionado reciente desde develop a main.');
+            }
+            return { body: mergedPR.body, number: mergedPR.number };
+
+      - name: Crear Tag
+        id: create_tag
+        run: |
+          TAG_MESSAGE="${{ steps.pr.outputs.body }}"
+          TAG_NAME="v$(date +'%Y%m%d%H%M%S')"
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG_NAME" -m "$TAG_MESSAGE"
+          git push origin "$TAG_NAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Crear Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.run_number }}
-          release_name: Release ${{ github.run_number }}
-          body: |
-            Changes in this Release
-            - First Change
-            - Second Change
+          tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
+          release_name: Release ${{ steps.create_tag.outputs.TAG_NAME }}
+          body: ${{ steps.pr.outputs.body }}
           draft: false
           prerelease: false
-      - name: automerge
-        uses: "pascalgn/automerge-action@4536e8847eb62fe2f0ee52c8fa92d17aa97f932f"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          MERGE_LABELS: ""
-      - name: merge with develop
-        uses: tukasz/direct-merge-action@master
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          source-branch: releases/${{ github.ref }}
-          target-branch: develop
-      - name: merge with main
-        uses: tukasz/direct-merge-action@master
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          source-branch: releases/${{ github.ref }}
-          target-branch: main
