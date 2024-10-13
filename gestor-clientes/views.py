@@ -221,7 +221,7 @@ class SelectClientPlan(Resource):
         db.session.commit()
 
         return client_schema.dump(client), 200
-    
+
 
 class ClientsByPlan(Resource):
     def get(self, plan_id):
