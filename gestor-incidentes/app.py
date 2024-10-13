@@ -4,14 +4,13 @@ from models import db
 from views import *
 from flask_migrate import Migrate
 from flask_cors import CORS
+from config import Config
 import os
 
 
 def create_app():
     app = Flask(__name__)
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["PROPAGATE_EXCEPTIONS"] = True
+    app.config.from_object(Config)
 
     app_context = app.app_context()
     app_context.push()
