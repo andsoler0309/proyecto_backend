@@ -37,10 +37,16 @@ class GenerateReport(Resource):
         stats = {
             "total_incidents": len(incident),
             "total_open_incidents": len([i for i in incident if i["status"] == "OPEN"]),
+            "total_closed_incidents": len([i for i in incident if i["status"] == "CLOSED"]),
             "total_closed_incidents": len(
                 [i for i in incident if i["status"] == "CLOSED"]
             ),
             "average_resolution_time": f"{random.randint(1, 100)} days",
+            "average_response_time": f"{random.randint(1, 100)} hours",
+            "total_phone_incidents": len([i for i in incident if i["registration_medium"] == "PHONE"]),
+            "total_email_incidents": len([i for i in incident if i["registration_medium"] == "EMAIL"]),
+            "total_chat_incidents": len([i for i in incident if i["registration_medium"] == "CHAT"]),
+            "compliance_rate": len([i for i in incident if i["status"] == "CLOSED"]) / len(incident) if len(incident) > 0 else 0,
         }
 
         # get the ia response from data
