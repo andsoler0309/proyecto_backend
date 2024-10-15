@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: generacion-reportes
-          image: us-central1-docker.pkg.dev/abcall/abcall/generacion-reportes:latest
+          image: us-central1-docker.pkg.dev/abcall/abcall/generacion-reportes:84d3315
           ports:
             - containerPort: 5000
           env:
