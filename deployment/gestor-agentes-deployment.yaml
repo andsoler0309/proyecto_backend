@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: gestor-agentes
-          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-agentes:latest
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-agentes:84d3315
           ports:
             - containerPort: 5000
           env:
