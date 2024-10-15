@@ -102,18 +102,21 @@ jobs:
         run: echo "Todas las pruebas fueron exitosas"
 
   release:
+
     name: Release
     needs: 
       - tests_api_gateway
       - tests_generacion_reportes
       - tests_gestor_agentes
       - tests_gestor_incidentes
+    if: "!contains(github.event.head_commit.message, '[ci auto-fix]')"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release branch
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Configurar Git
         run: |
