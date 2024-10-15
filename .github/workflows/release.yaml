@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:    
   tests_api_gateway:
@@ -102,18 +103,21 @@ jobs:
         run: echo "Todas las pruebas fueron exitosas"
 
   release:
+
     name: Release
     needs: 
       - tests_api_gateway
       - tests_generacion_reportes
       - tests_gestor_agentes
       - tests_gestor_incidentes
+    if: "!contains(github.event.head_commit.message, '[ci auto-fix]')"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release branch
         uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Configurar Git
         run: |
@@ -138,14 +142,19 @@ jobs:
           git push origin ${{ github.ref }}
         
       - name: Crear Pull Request a main
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Merge release branch into main"
-          title: "Release: Merge $(echo ${{ github.ref }} | awk -F/ '{print $NF}') into main"
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          signoff: false
+          title: "Release: Merge ${{ github.ref }} into main"
           body: |
             Esta PR sincroniza la rama release con las últimas actualizaciones de develop y main.
           base: main
-          head: ${{ github.ref }}
+          branch: ${{ github.ref }}
+          assignees: andsoler0309
+          delete-branch: true
           draft: false
           labels: release
