@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:    
   tests_api_gateway:
@@ -141,14 +142,17 @@ jobs:
           git push origin ${{ github.ref }}
         
       - name: Crear Pull Request a main
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Merge release branch into main"
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+          signoff: false
           title: "Release: Merge $(echo ${{ github.ref }} | awk -F/ '{print $NF}') into main"
           body: |
             Esta PR sincroniza la rama release con las últimas actualizaciones de develop y main.
           base: main
-          source: ${{ github.ref }}
-          draft: false
-          labels: release
+          branch: ${{ github.ref }}
+          delete-branch: true
+          draft: false          
