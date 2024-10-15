@@ -1,14 +1,14 @@
 name: CI/CD para despliegue en GKE
 
-on:
-  push:
-    branches:
-      - main
-
 # on:
 #   push:
 #     branches:
-#     - 'deployment/**'
+#       - main
+
+on:
+  push:
+    branches:
+    - 'deployment/**'
 
 jobs:
   deploy:
@@ -37,6 +37,10 @@ jobs:
     - name: Configurar Docker para Artifact Registry
       run: |
         gcloud auth configure-docker us-central1-docker.pkg.dev
+      
+    - name: Definir etiqueta única
+      id: tag
+      run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
     - name: Construir y empujar imágenes Docker
       run: |
@@ -48,40 +52,32 @@ jobs:
 
           if [ -d "$service" ]; then
             SERVICE_NAME=$(basename "$service")
-            echo "Construyendo y empujando la imagen para $SERVICE_NAME..."
+            echo "Construyendo y empujando la imagen para $SERVICE_NAME con la etiqueta $TAG..."
 
-            docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:latest ./$SERVICE_NAME
-            docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:latest
+            docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG} ./$SERVICE_NAME
+            docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}
           fi
         done
 
-    # - name: Actualizar los manifiestos de Kubernetes con las nuevas imágenes
-    #   run: |
-    #     for service in */; do
-    #       # Ignorar la carpeta deployment y cualquier otra carpeta que no sea un microservicio
-    #       if [ "$service" = "deployment/" ]; then
-    #         continue
-    #       fi
+    - name: Actualizar los manifiestos de Kubernetes con las nuevas imágenes
+      run: |
+        for service in */; do
+          # Ignorar las carpetas deployment/ y .github/
+          if [[ "$service" == "deployment/" || "$service" == ".github/" ]]; then
+            continue
+          fi
 
-    #       if [ -d "$service" ]; then
-    #         SERVICE_NAME=$(basename "$service")
-    #         DEPLOYMENT_FILE="deployment/${SERVICE_NAME}-deployment.yaml"
+          if [ -d "$service" ]; then
+            SERVICE_NAME=$(basename "$service")
+            DEPLOYMENT_FILE="deployment/${SERVICE_NAME}-deployment.yaml"
 
-    #         if [ -f "$DEPLOYMENT_FILE" ]; then
-    #           echo "Actualizando el manifiesto de $SERVICE_NAME con la nueva imagen..."
+            if [ -f "$DEPLOYMENT_FILE" ]; then
+              echo "Actualizando el manifiesto de $SERVICE_NAME con la imagen us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}..."
 
-    #           # Reemplazar la línea de la imagen en el manifiesto de Kubernetes
-    #           sed -i "s|image: .*|image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:latest|g" "$DEPLOYMENT_FILE"
-    #         else
-    #           echo "Advertencia: El archivo $DEPLOYMENT_FILE no existe. Asegúrate de que el manifiesto de Kubernetes esté correctamente nombrado."
-    #         fi
-    #       fi
-    #     done
-
-    # - name: Desplegar en GKE
-    #   run: |
-    #     kubectl apply -f deployment/k8s-deployment-app.yaml
-
-    # - name: Verificar el estado de los pods
-    #   run: |
-    #     kubectl rollout status deployment --all
+              # Reemplazar únicamente la línea que contiene 'image:' con la nueva imagen
+              sed -i "s|image: .*|image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}|g" "$DEPLOYMENT_FILE"
+            else
+              echo "Advertencia: El archivo $DEPLOYMENT_FILE no existe. Asegúrate de que el manifiesto de Kubernetes esté correctamente nombrado."
+            fi
+          fi
+        done
