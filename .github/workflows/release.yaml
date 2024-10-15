@@ -149,11 +149,12 @@ jobs:
           committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
           signoff: false
-          title: "Release: Merge $(echo ${{ github.ref }} | awk -F/ '{print $NF}') into main"
+          title: "Release: Merge ${{ github.ref }} into main"
           body: |
             Esta PR sincroniza la rama release con las últimas actualizaciones de develop y main.
           base: main
           branch: ${{ github.ref }}
+          assignees: andsoler0309
           delete-branch: true
           draft: false
           labels: release
