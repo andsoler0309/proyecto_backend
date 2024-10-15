@@ -1,0 +1,67 @@
+###################################
+# generacion-reportes
+###################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generacion-reportes
+  labels:
+    app: generacion-reportes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generacion-reportes
+  template:
+    metadata:
+      labels:
+        app: generacion-reportes
+    spec:
+      containers:
+        - name: generacion-reportes
+          image: us-central1-docker.pkg.dev/abcall/abcall/generacion-reportes:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: GESTOR_INCIDENTES_BASE_URL
+              value: http://servicio-gestor-incidentes
+            - name: GESTOR_CLIENTES_BASE_URL
+              value: http://servicio-gestor-clientes
+            - name: GESTOR_AGENTES_BASE_URL
+              value: http://servicio-gestor-agentes
+            - name: SERVICIO_IA_BASE_URL
+              value: http://servicio-servicio-ia
+            - name: DATABASE_URL
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+          imagePullPolicy: Always
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: generacion-reportes-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /generacion-reportes/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-generacion-reportes
+  annotations:
+    cloud.google.com/backend-config: '{"default": "generacion-reportes-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: generacion-reportes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31022
+---

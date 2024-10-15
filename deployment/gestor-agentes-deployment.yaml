@@ -1,0 +1,60 @@
+###################################
+# gestor-agentes
+###################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestor-agentes
+  labels:
+    app: gestor-agentes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gestor-agentes
+  template:
+    metadata:
+      labels:
+        app: gestor-agentes
+    spec:
+      containers:
+        - name: gestor-agentes
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-agentes:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+          imagePullPolicy: Always
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: gestor-agentes-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /gestor-agentes/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-gestor-agentes
+  annotations:
+    cloud.google.com/backend-config: '{"default": "gestor-agentes-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: gestor-agentes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31026
+---

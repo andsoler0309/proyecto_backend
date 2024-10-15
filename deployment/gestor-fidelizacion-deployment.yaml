@@ -1,0 +1,57 @@
+###################################
+# gestor-fidelizacion
+###################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestor-fidelizacion
+  labels:
+    app: gestor-fidelizacion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gestor-fidelizacion
+  template:
+    metadata:
+      labels:
+        app: gestor-fidelizacion
+    spec:
+      containers:
+        - name: gestor-fidelizacion
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-fidelizacion:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: VIEW_360_BASE_URL
+              value: http://servicio-vista-360
+          imagePullPolicy: Always
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: gestor-fidelizacion-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /gestor-fidelizacion/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-gestor-fidelizacion
+  annotations:
+    cloud.google.com/backend-config: '{"default": "gestor-fidelizacion-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: gestor-fidelizacion
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31024
+---

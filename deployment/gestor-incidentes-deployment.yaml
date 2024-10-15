@@ -1,0 +1,64 @@
+###################################
+# gestor-incidentes
+###################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestor-incidentes
+  labels:
+    app: gestor-incidentes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gestor-incidentes
+  template:
+    metadata:
+      labels:
+        app: gestor-incidentes
+    spec:
+      containers:
+        - name: gestor-incidentes
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-incidentes:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: SERVICIO_IA_BASE_URL
+              value: http://servicio-servicio-ia
+            - name: DATABASE_URL
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+            # - name: VIEW_360_BASE_URL
+            #   value: http://servicio-vista-360
+          imagePullPolicy: Always
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: gestor-incidentes-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /gestor-incidentes/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-gestor-incidentes
+  annotations:
+    cloud.google.com/backend-config: '{"default": "gestor-incidentes-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: gestor-incidentes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31023
+---

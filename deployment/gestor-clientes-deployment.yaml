@@ -1,0 +1,64 @@
+###################################
+# gestor-clientes
+###################################
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gestor-clientes
+  labels:
+    app: gestor-clientes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gestor-clientes
+  template:
+    metadata:
+      labels:
+        app: gestor-clientes
+    spec:
+      containers:
+        - name: gestor-clientes
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-clientes:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: GENERACION_REPORTES_BASE_URL
+              value: http://servicio-generacion-reportes
+            - name: DATABASE_URL
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+          # Realizar pull siempre a la imagen
+          imagePullPolicy: Always
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: gestor-clientes-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /gestor-clientes/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-gestor-clientes
+  annotations:
+    cloud.google.com/backend-config: '{"default": "gestor-clientes-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: gestor-clientes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31021
+---
