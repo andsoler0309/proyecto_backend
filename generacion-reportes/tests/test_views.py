@@ -18,6 +18,7 @@ def test_generate_report_success(client_generacion_reportes):
             "incident_id": "incident123",
             "agent_id": "agent123",
             "status": "OPEN",
+            "registration_medium": "PHONE",
         }
     ]
 

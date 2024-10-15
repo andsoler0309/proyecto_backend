@@ -1,0 +1,59 @@
+###################################
+# vista-360
+###################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vista-360
+  labels:
+    app: vista-360
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vista-360
+  template:
+    metadata:
+      labels:
+        app: vista-360
+    spec:
+      containers:
+        - name: vista-360
+          image: us-central1-docker.pkg.dev/abcall/abcall/vista-360:84d3315
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+          imagePullPolicy: Always
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: vista-360-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /vista-360/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-vista-360
+  annotations:
+    cloud.google.com/backend-config: '{"default": "vista-360-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: vista-360
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31025
