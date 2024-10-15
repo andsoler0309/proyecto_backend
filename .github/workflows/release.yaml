@@ -3,6 +3,10 @@ on:
   push:
     branches: 
       - 'release**'
+
+permissions:
+  contents: write
+
 jobs:    
   tests_api_gateway:
     name: Pruebas para api-gateway
@@ -97,8 +101,8 @@ jobs:
         if: ${{ success() }}
         run: echo "Todas las pruebas fueron exitosas"
 
-  automerge:
-    name: Automerge
+  release:
+    name: Release
     needs: 
       - tests_api_gateway
       - tests_generacion_reportes
@@ -106,34 +110,42 @@ jobs:
       - tests_gestor_incidentes
     runs-on: ubuntu-latest
     steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout release branch
+        uses: actions/checkout@v3
         with:
-          tag_name: ${{ github.run_number }}
-          release_name: Release ${{ github.run_number }}
+          ref: ${{ github.ref }}
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Configurar acceso remoto con GITHUB_TOKEN
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git fetch origin develop main
+
+      - name: Merge develop into release
+        run: |
+          git merge origin/develop --no-ff -m "Merge develop into release"
+
+      - name: Merge main into release
+        run: |
+          git merge origin/main --no-ff -m "Merge main into release"
+      
+      - name: Push changes to release branch
+        run: |
+          git push origin ${{ github.ref }}
+        
+      - name: Crear Pull Request a main
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Merge release branch into main"
+          title: "Release: Merge $(echo ${{ github.ref }} | awk -F/ '{print $NF}') into main"
           body: |
-            Changes in this Release
-            - First Change
-            - Second Change
+            Esta PR sincroniza la rama release con las últimas actualizaciones de develop y main.
+          base: main
+          head: ${{ github.ref }}
           draft: false
-          prerelease: false
-      - name: automerge
-        uses: "pascalgn/automerge-action@4536e8847eb62fe2f0ee52c8fa92d17aa97f932f"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          MERGE_LABELS: ""
-      - name: merge with develop
-        uses: tukasz/direct-merge-action@master
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          source-branch: releases/${{ github.ref }}
-          target-branch: develop
-      - name: merge with main
-        uses: tukasz/direct-merge-action@master
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          source-branch: releases/${{ github.ref }}
-          target-branch: main
+          labels: release
