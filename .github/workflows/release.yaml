@@ -149,6 +149,6 @@ jobs:
           body: |
             Esta PR sincroniza la rama release con las últimas actualizaciones de develop y main.
           base: main
-          head: ${{ github.ref }}
+          source: ${{ github.ref }}
           draft: false
           labels: release
