@@ -1,14 +1,9 @@
 name: CI/CD para despliegue en GKE
 
-# on:
-#   push:
-#     branches:
-#       - main
-
 on:
   push:
     branches:
-    - 'deployment/**'
+      - main
 
 permissions:
   contents: write
@@ -32,10 +27,10 @@ jobs:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         install_components: 'gke-gcloud-auth-plugin'
 
-    # - name: Configurar kubectl
-    #   run: |
-    #     gcloud components install kubectl
-    #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
+    - name: Configurar kubectl
+      run: |
+        gcloud components install kubectl
+        gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Configurar Docker para Artifact Registry
       run: |
@@ -45,22 +40,22 @@ jobs:
       id: tag
       run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
 
-    # - name: Construir y empujar imágenes Docker
-    #   run: |
-    #     for service in */; do
-    #       # Ignorar las carpetas deployment/ y .github/
-    #       if [[ "$service" == "deployment/" || "$service" == ".github/" ]]; then
-    #         continue
-    #       fi
+    - name: Construir y empujar imágenes Docker
+      run: |
+        for service in */; do
+          # Ignorar las carpetas deployment/ y .github/
+          if [[ "$service" == "deployment/" || "$service" == ".github/" ]]; then
+            continue
+          fi
 
-    #       if [ -d "$service" ]; then
-    #         SERVICE_NAME=$(basename "$service")
-    #         echo "Construyendo y empujando la imagen para $SERVICE_NAME con la etiqueta $TAG..."
+          if [ -d "$service" ]; then
+            SERVICE_NAME=$(basename "$service")
+            echo "Construyendo y empujando la imagen para $SERVICE_NAME con la etiqueta $TAG..."
 
-    #         docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG} ./$SERVICE_NAME
-    #         docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}
-    #       fi
-    #     done
+            docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG} ./$SERVICE_NAME
+            docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}
+          fi
+        done
 
     - name: Actualizar los manifiestos de Kubernetes con las nuevas imágenes
       run: |
@@ -84,6 +79,14 @@ jobs:
             fi
           fi
         done
+
+    - name: Desplegar en GKE
+      run: |
+        kubectl apply -f deployment/
+
+    - name: Verificar el estado de los pods
+      run: |
+        kubectl rollout status deployment --all
 
     - name: Configurar Git para Commits Automáticos
       if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
