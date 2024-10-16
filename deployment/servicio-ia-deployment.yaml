@@ -1,0 +1,61 @@
+###################################
+# servicio-ia
+###################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: servicio-ia
+  labels:
+    app: servicio-ia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: servicio-ia
+  template:
+    metadata:
+      labels:
+        app: servicio-ia
+    spec:
+      containers:
+        - name: servicio-ia
+          image: us-central1-docker.pkg.dev/abcall/abcall/servicio-ia:84d3315
+          ports:
+            - containerPort: 5000
+          env:
+            - name: GESTOR_INCIDENTES_BASE_URL
+              value: http://servicio-gestor-incidentes
+            - name: DATABASE_URL
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+          imagePullPolicy: Always
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: servicio-ia-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /servicio-ia/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-servicio-ia
+  annotations:
+    cloud.google.com/backend-config: '{"default": "servicio-ia-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: servicio-ia
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31027

@@ -1,0 +1,78 @@
+###################################
+# API GATEWAY
+###################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  labels:
+    app: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: us-central1-docker.pkg.dev/abcall/abcall/api-gateway:84d3315
+          ports:
+            - containerPort: 5000
+          env:
+            - name: GESTOR_CLIENTES_BASE_URL
+              value: http://servicio-gestor-clientes
+            - name: GENERACION_REPORTES_BASE_URL
+              value: http://servicio-generacion-reportes
+            - name: GESTOR_INCIDENTES_BASE_URL
+              value: http://servicio-gestor-incidentes
+            - name: GESTOR_AGENTES_BASE_URL
+              value: http://servicio-gestor-agentes
+            - name: SERVICIO_IA_BASE_URL
+              value: http://servicio-servicio-ia
+            - name: DATABASE_URL
+              valueFrom:
+                  secretKeyRef:
+                    name: app-secrets 
+                    key: DATABASE_URL
+
+            # - name: OPENAI_API_KEY
+            #   valueFrom:
+            #       secretKeyRef:
+            #         name: app-secrets 
+            #         key: OPENAI_API_KEY
+
+          # Realizar pull siempre a la imagen
+          imagePullPolicy: Always
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: api-gateway-config
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    port: 5000
+    type: HTTP
+    requestPath: /api-gateway/ping
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: servicio-api-gateway
+  annotations:
+    cloud.google.com/backend-config: '{"default": "api-gateway-config"}'
+spec:
+  type: NodePort
+  selector:
+    app: api-gateway
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+      nodePort: 31030
+---
