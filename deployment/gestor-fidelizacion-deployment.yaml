@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: gestor-fidelizacion
-          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-fidelizacion:84d3315
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-fidelizacion:bea6da1
           ports:
             - containerPort: 5000
           env:

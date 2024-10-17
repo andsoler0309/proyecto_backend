@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: gestor-incidentes
-          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-incidentes:84d3315
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-incidentes:bea6da1
           ports:
             - containerPort: 5000
           env:

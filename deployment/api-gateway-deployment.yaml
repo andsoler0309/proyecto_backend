@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: us-central1-docker.pkg.dev/abcall/abcall/api-gateway:84d3315
+          image: us-central1-docker.pkg.dev/abcall/abcall/api-gateway:bea6da1
           ports:
             - containerPort: 5000
           env:
