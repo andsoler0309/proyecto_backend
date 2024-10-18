@@ -208,3 +208,19 @@ class GetPlans(Resource):
             return {"msg": "Error communicating with Clients Service"}, 503
 
         return plans_response.json(), 200
+
+
+class getclients(Resource):
+    def get(self):
+        try:
+            clients_response = requests.get(
+                f"{Config.GESTOR_CLIENTES_BASE_URL}/clients",
+                timeout=5,
+            )
+            if clients_response.status_code != 200:
+                return clients_response.json(), clients_response.status_code
+        except requests.exceptions.RequestException as e:
+            current_app.logger.error(f"Error communicating with Clients Service: {e}")
+            return {"msg": "Error communicating with Clients Service"}, 503
+
+        return clients_response.json(), 200

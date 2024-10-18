@@ -137,6 +137,12 @@ def create_app():
         methods=["GET"],
     )
     api.add_resource(
+        getclients,
+        "/clients",
+        endpoint="get_clients",
+        methods=["GET"],
+    )
+    api.add_resource(
         ChatBot,
         "/chatbot",
         endpoint="chatbot",
