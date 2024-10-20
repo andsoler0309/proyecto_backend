@@ -45,3 +45,19 @@ Nombre rama | Propósito
 ## Estrategia de git
 Git flow
 ![355229748-00efaca3-d8df-457d-ba20-c3a7f1801d08](https://github.com/user-attachments/assets/78a0c59b-4e54-4f50-b43e-6994adfe977c)
+
+
+## Flujo de Integracion y Despliegue Continuo:
+Para este reppsitorio se tiene implementado un sistema de CI/CD basado en GitHub actions y CGP, consistendo de las siguientes caracteristicas:
+
+- La integracion Continua arranca de dos formas:
+  - Cada que se genere un push a un rama release.
+  - Cada que se genere un pull request a la rama develop.
+  - La integracion continua hace una correccion en formateo de codigo y corre los tests para que todo este funcionando correctamente.
+
+- El despliegue continuo arranca:
+  - Cada que se genere un push a la rama main.
+  - Primero corre los tests y si estos pasan, se procede a hacer el despliegue en GCP.
+  - Se generan las imagenes de docker y se suben a GCP.
+  - Se actualizan las imagenes en la configuracion de kubernetes.
+  - Se despliega la nueva version en GCP.
