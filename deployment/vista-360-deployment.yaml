@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: vista-360
-          image: us-central1-docker.pkg.dev/abcall/abcall/vista-360:84d3315
+          image: us-central1-docker.pkg.dev/abcall/abcall/vista-360:bea6da1
           ports:
             - containerPort: 5000
           env:

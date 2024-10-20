@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: gestor-clientes
-          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-clientes:84d3315
+          image: us-central1-docker.pkg.dev/abcall/abcall/gestor-clientes:bea6da1
           ports:
             - containerPort: 5000
           env:
