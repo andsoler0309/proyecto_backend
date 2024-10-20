@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: servicio-ia
-          image: us-central1-docker.pkg.dev/abcall/abcall/servicio-ia:bea6da1
+          image: us-central1-docker.pkg.dev/abcall/abcall/servicio-ia:dab7258
           ports:
             - containerPort: 5000
           env:
