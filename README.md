@@ -1,30 +1,14 @@
 # Proyecto grupo 12 ABCall
 
 ## Sobre el equipo
-<table border="0">
- <tr>
-  <td>Nombre equipo</td>
-  <td>Breaking REST</td>
- </tr>
-
- <tr>
-  <td rowspan="2">Horario de reuniones</td>
-  <td>Lunes 10:30 PM UTC-5</td>
- </tr>
-<tr>
-  
-  <td>Sábado 9:00 AM UTC-5</td>
- </tr>
-</table>
-
 
 ## Integrantes
-| Nombre  | Correo                | Usuario github              | ¿Es líder?         |
-|---------|-----------------------| --------------------------- | :------------------: |
-| David Guerrero    | df.guerrerov1@uniandes.edu.co      |dafermiso | No |
-| Ines Rojas   | ia.rojas2@uniandes.edu.co    | leinaro | Sí|
-| Dario Rios | jd.rios2@uniandes.edu.co    | daRios07 | No |
-| Andres Soler   | a.solerf@uniandes.edu.co     | andsoler0309 | No |
+| Nombre  | Correo                | Usuario github              | 
+|---------|-----------------------| --------------------------- | 
+| Emmanuel Rodriguez    | e.rodriguezz@uniandes.edu.co      | emrz16 |
+| Ines Rojas   | ia.rojas2@uniandes.edu.co    | leinaro |
+| Dario Rios | jd.rios2@uniandes.edu.co    | daRios07 |
+| Andres Soler   | a.solerf@uniandes.edu.co     | andsoler0309 |
 
 
 ## Metodología de trabajo
