@@ -197,6 +197,13 @@ class GetIncidentsByClient(Resource):
         return incidents, 200
 
 
+
+
+
+
+
+
+
 class GetIncidentPossibleSolution(Resource):
     def get(self, incident_id):
         try:
@@ -212,3 +219,7 @@ class GetIncidentPossibleSolution(Resource):
             return {"msg": "Error communicating with Incidents Service"}, 503
 
         return solution, 200
+
+
+
+
