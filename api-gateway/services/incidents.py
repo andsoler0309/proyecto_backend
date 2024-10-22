@@ -39,7 +39,7 @@ class CreateIncident(Resource):
             incidents_response = requests.post(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents",
                 json=validated_data,
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
@@ -57,7 +57,7 @@ class DeleteIncident(Resource):
         try:
             incident_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5,
+                timeout=900,
             )
             if incident_response.status_code != 200:
                 return incident_response.json(), incident_response.status_code
@@ -70,7 +70,7 @@ class DeleteIncident(Resource):
         try:
             delete_response = requests.delete(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
@@ -94,7 +94,7 @@ class UpdateIncident(Resource):
         try:
             incident_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5,
+                timeout=900,
             )
             if incident_response.status_code != 200:
                 return incident_response.json(), incident_response.status_code
@@ -116,7 +116,7 @@ class UpdateIncident(Resource):
             update_response = requests.put(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
                 json=validated_data,
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
@@ -133,7 +133,7 @@ class GetIncidentDetail(Resource):
         try:
             incident_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5,
+                timeout=900,
             )
             if incident_response.status_code != 200:
                 return incident_response.json(), incident_response.status_code
@@ -150,7 +150,7 @@ class GetIncidentsByUser(Resource):
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/user/{user_id}",
-                timeout=5,
+                timeout=900,
             )
             if incidents_response.status_code != 200:
                 return incidents_response.json(), incidents_response.status_code
@@ -167,7 +167,7 @@ class GetIncidentsByAgent(Resource):
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/agent/{agent_id}",
-                timeout=5,
+                timeout=900,
             )
             if incidents_response.status_code != 200:
                 return incidents_response.json(), incidents_response.status_code
@@ -185,7 +185,7 @@ class GetIncidentsByClient(Resource):
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/client/{client_id}",
-                timeout=5,
+                timeout=900,
             )
             if incidents_response.status_code != 200:
                 return incidents_response.json(), incidents_response.status_code
@@ -202,7 +202,7 @@ class GetIncidentPossibleSolution(Resource):
         try:
             solution_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}/solution",
-                timeout=5,
+                timeout=900,
             )
             if solution_response.status_code != 200:
                 return solution_response.json(), solution_response.status_code

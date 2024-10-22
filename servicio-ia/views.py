@@ -169,7 +169,7 @@ class Chatbot(Resource):
                 incidents_response = requests.post(
                     f"{GESTOR_INCIDENTES_BASE_URL}/incidents",
                     json=incident,
-                    timeout=5,
+                    timeout=900,
                 )
                 print(incidents_response)
             except requests.exceptions.RequestException as e:
@@ -192,7 +192,7 @@ class Incident(Resource):
         try:
             incident_response = requests.get(
                 f"{GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
-                timeout=5,
+                timeout=900,
             )
             if incident_response.status_code != 200:
                 return incident_response.json(), incident_response.status_code

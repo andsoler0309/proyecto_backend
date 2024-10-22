@@ -20,7 +20,7 @@ class ChatBot(Resource):
             chat_bot_response = requests.post(
                 f"{Config.SERVICIO_IA_BASE_URL}/chatbot",
                 json=validated_data,
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with ChatBot Service: {e}")

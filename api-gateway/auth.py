@@ -55,7 +55,7 @@ def token_required(f):
 
             # Verify agent existence via Gestor-Agente
             response = requests.get(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=900
             )
             if response.status_code != 200:
                 return {"msg": "Agent not found"}, 401
@@ -87,7 +87,7 @@ def role_required(required_roles):
 
                 # Verify agent existence via Gestor-Agente
                 response = requests.get(
-                    f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5
+                    f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=900
                 )
                 if response.status_code != 200:
                     return {"msg": "Agent not found"}, 401
@@ -139,7 +139,7 @@ def client_required(f):
 
             # Verify client existence via Gestor-Clientes
             response = requests.get(
-                f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}", timeout=5
+                f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}", timeout=900
             )
             if response.status_code != 200:
                 return {"msg": "Client not found"}, 401
