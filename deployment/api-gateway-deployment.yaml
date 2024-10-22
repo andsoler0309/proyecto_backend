@@ -37,7 +37,7 @@ spec:
               valueFrom:
                   secretKeyRef:
                     name: app-secrets 
-                    key: DATABASE_URL
+                    key: DATABASE_URL_USUARIOS
 
             # - name: OPENAI_API_KEY
             #   valueFrom:
