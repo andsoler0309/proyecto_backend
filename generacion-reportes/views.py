@@ -19,7 +19,7 @@ class GenerateReport(Resource):
         # get incidents data
         incident_response = requests.get(
             f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/client/{client_id}",
-            timeout=5,
+            timeout=900,
         )
         if incident_response.status_code != 200:
             return incident_response.json(), incident_response.status_code
@@ -28,7 +28,7 @@ class GenerateReport(Resource):
         # get client data
         client_response = requests.get(
             f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}",
-            timeout=5,
+            timeout=900,
         )
         if client_response.status_code != 200:
             return client_response.json(), client_response.status_code
@@ -64,7 +64,7 @@ class GenerateReport(Resource):
         # get the ia response from data
         ia_response = requests.post(
             f"{Config.SERVICIO_IA_BASE_URL}/report/{client_id}",
-            timeout=5,
+            timeout=900,
         )
 
         if ia_response.status_code != 200:

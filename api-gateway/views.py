@@ -91,7 +91,7 @@ class Login(Resource):
             gestor_response = requests.post(
                 f"{Config.GESTOR_AGENTES_BASE_URL}/agent/login",
                 json={"email": email, "password": password},
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
@@ -150,7 +150,7 @@ class Login(Resource):
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/agent/{agent_id}",
-                timeout=5,
+                timeout=900,
             )
             if incidents_response.status_code != 200:
                 current_app.logger.error(
@@ -244,7 +244,7 @@ class VerifySecurityAnswer(Resource):
         # Fetch agent data from Gestor-Agente
         try:
             gestor_response = requests.get(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=900
             )
             if gestor_response.status_code != 200:
                 current_app.logger.error(f"Agent not found: {agent_id}")
@@ -264,7 +264,7 @@ class VerifySecurityAnswer(Resource):
         try:
             incidents_response = requests.get(
                 f"{Config.GESTOR_INCIDENTES_BASE_URL}/incidents/agent/{agent_id}",
-                timeout=5,
+                timeout=900,
             )
             if incidents_response.status_code != 200:
                 current_app.logger.error(
@@ -416,7 +416,7 @@ class CreateAgent(Resource):
             gestor_response = requests.post(
                 f"{Config.GESTOR_AGENTES_BASE_URL}/agents/register",
                 json=validated_data,
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
@@ -433,7 +433,7 @@ class DeleteAgent(Resource):
         # Forward the agent deletion to Gestor-Agente service
         try:
             gestor_response = requests.delete(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=900
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
@@ -451,7 +451,7 @@ class AdminUnlockAgent(Resource):
         # Unlock the agent account via Gestor-Agente
         try:
             response = requests.post(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock", timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock", timeout=900
             )
             if response.status_code == 200:
                 # Reset failed attempts
@@ -470,7 +470,7 @@ class AdminResetAgent(Resource):
         # Reset agent data via Gestor-Agente
         try:
             response = requests.post(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/reset", timeout=5
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/reset", timeout=900
             )
             if response.status_code == 200:
                 return {"msg": f"Agent {agent_id} has been reset"}, 200

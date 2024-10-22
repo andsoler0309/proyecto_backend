@@ -33,7 +33,7 @@ class CreateClient(Resource):
             clients_response = requests.post(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/register",
                 json=validated_data,
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Clients Service: {e}")
@@ -60,7 +60,7 @@ class ClientLogin(Resource):
             clients_response = requests.post(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/login",
                 json={"email": email, "password": password},
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Gestor-cliente: {e}")
@@ -85,7 +85,7 @@ class GetClient(Resource):
         try:
             clients_response = requests.get(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}",
-                timeout=5,
+                timeout=900,
             )
             if clients_response.status_code != 200:
                 return clients_response.json(), clients_response.status_code
@@ -101,7 +101,7 @@ class GetClientPlan(Resource):
         try:
             plan_response = requests.get(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}/plan",
-                timeout=5,
+                timeout=900,
             )
             if plan_response.status_code != 200:
                 return plan_response.json(), plan_response.status_code
@@ -124,7 +124,7 @@ class UpdateClient(Resource):
             clients_response = requests.put(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}",
                 json=validated_data,
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Clients Service: {e}")
@@ -149,7 +149,7 @@ class UpdateClientPlan(Resource):
             plan_response = requests.put(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}/plan",
                 json=validated_data,
-                timeout=5,
+                timeout=900,
             )
             if plan_response.status_code != 200:
                 return plan_response.json(), plan_response.status_code
@@ -166,7 +166,7 @@ class SelectClientPlan(Resource):
         try:
             plan_response = requests.post(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/{client_id}/plan/{plan_id}",
-                timeout=5,
+                timeout=900,
             )
             if plan_response.status_code != 200:
                 return plan_response.json(), plan_response.status_code
@@ -182,7 +182,7 @@ class GetClientsByPlan(Resource):
         try:
             clients_response = requests.get(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/plan/{plan_id}",
-                timeout=5,
+                timeout=900,
             )
             if clients_response.status_code != 200:
                 return clients_response.json(), clients_response.status_code
@@ -199,7 +199,7 @@ class GetPlans(Resource):
         try:
             plans_response = requests.get(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/plans",
-                timeout=5,
+                timeout=900,
             )
             if plans_response.status_code != 200:
                 return plans_response.json(), plans_response.status_code
@@ -215,7 +215,7 @@ class getclients(Resource):
         try:
             clients_response = requests.get(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/clients",
-                timeout=5,
+                timeout=900,
             )
             if clients_response.status_code != 200:
                 return clients_response.json(), clients_response.status_code

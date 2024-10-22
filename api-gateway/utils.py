@@ -65,7 +65,7 @@ def notify_admin(subject, message):
     # Fetch all admin email addresses via API call
     try:
         response = requests.get(
-            f"{Config.GESTOR_AGENTES_BASE_URL}/agents/admins", timeout=5
+            f"{Config.GESTOR_AGENTES_BASE_URL}/agents/admins", timeout=900
         )
         if response.status_code != 200:
             current_app.logger.error("Failed to fetch admin email addresses.")
@@ -137,7 +137,7 @@ def lock_agent_account(agent_id):
     # Send a request to Gestor-Agente to lock the agent account
     try:
         response = requests.post(
-            f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/lock", timeout=5
+            f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/lock", timeout=900
         )
         if response.status_code == 200:
             current_app.logger.info(

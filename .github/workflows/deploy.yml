@@ -77,8 +77,7 @@ jobs:
               --platform managed \
               --allow-unauthenticated \
               --project ${{ secrets.GCP_PROJECT_ID }} \
-              --port 5000 \
-              --timeout 900
+              --port 5000
           fi
         done
 
@@ -86,7 +85,7 @@ jobs:
     #   run: |
     #     for service in */; do
     #       # Ignorar las carpetas deployment/ y .github/
-    #       if [[ "$service" == "deployment/" || "$service" == ".github/" ]]; then
+    #       if [[ "$service" == "deployment/" || "$service" == ".github/" || "$service" == "gestor-fidelizacion/" || "$service" == "vista-360/" ]]; then
     #         continue
     #       fi
 

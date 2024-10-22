@@ -11,7 +11,7 @@ class GetReportFromClient(Resource):
         try:
             report_response = requests.get(
                 f"{Config.GENERACION_REPORTES_BASE_URL}/reports/{client_id}",
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Reports Service: {e}")
