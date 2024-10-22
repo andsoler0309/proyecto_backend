@@ -29,7 +29,7 @@ spec:
               valueFrom:
                   secretKeyRef:
                     name: app-secrets 
-                    key: DATABASE_URL
+                    key: DATABASE_URL_INCIDENTES
             # - name: VIEW_360_BASE_URL
             #   value: http://servicio-vista-360
           imagePullPolicy: Always

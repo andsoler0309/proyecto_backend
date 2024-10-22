@@ -1,6 +1,8 @@
 FROM python:3.9
 
 ENV PYTHONUNBUFFERED=1
+ENV DATABASE_URL=postgresql+psycopg2://postgres:1234@192.168.0.10/postgres
+ENV GENERACION_REPORTES_BASE_URL=https://generacion-reportes-649096178068.us-central1.run.app
 
 WORKDIR /app
 
