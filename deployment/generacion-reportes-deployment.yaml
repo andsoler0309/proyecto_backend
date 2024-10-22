@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: generacion-reportes
-          image: us-central1-docker.pkg.dev/abcall/abcall/generacion-reportes:84d3315
+          image: us-central1-docker.pkg.dev/abcall/abcall/generacion-reportes:dab7258
           ports:
             - containerPort: 5000
           env:
@@ -35,7 +35,7 @@ spec:
               valueFrom:
                   secretKeyRef:
                     name: app-secrets 
-                    key: DATABASE_URL
+                    key: DATABASE_URL_INCIDENTES
           imagePullPolicy: Always
 ---
 apiVersion: cloud.google.com/v1
