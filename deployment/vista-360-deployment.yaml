@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: vista-360
-          image: us-central1-docker.pkg.dev/abcall/abcall/vista-360:dab7258
+          image: us-central1-docker.pkg.dev/abcall/abcall/vista-360:84d3315
           ports:
             - containerPort: 5000
           env:
@@ -27,7 +27,7 @@ spec:
               valueFrom:
                   secretKeyRef:
                     name: app-secrets 
-                    key: DATABASE_URL_USUARIOS
+                    key: DATABASE_URL
           imagePullPolicy: Always
 
 ---

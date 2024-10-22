@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: us-central1-docker.pkg.dev/abcall/abcall/api-gateway:dab7258
+          image: us-central1-docker.pkg.dev/abcall/abcall/api-gateway:84d3315
           ports:
             - containerPort: 5000
           env:
@@ -37,7 +37,7 @@ spec:
               valueFrom:
                   secretKeyRef:
                     name: app-secrets 
-                    key: DATABASE_URL_USUARIOS
+                    key: DATABASE_URL
 
             # - name: OPENAI_API_KEY
             #   valueFrom:
