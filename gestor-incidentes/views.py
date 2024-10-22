@@ -140,7 +140,7 @@ class GetIncidentPossibleSolution(Resource):
         try:
             response = requests.get(
                 f"{SERVICIO_IA_BASE_URL}/incident/{incident_id}",
-                timeout=5,
+                timeout=900,
             )
         except requests.exceptions.RequestException as e:
             return {"msg": "Error communicating with IA Service"}, 503

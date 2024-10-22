@@ -25,7 +25,7 @@ def test_create_client_success(client):
         mock_post.assert_called_with(
             f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/register",
             json=data,
-            timeout=5,
+            timeout=900,
         )
 
 
@@ -66,7 +66,7 @@ def test_client_login_success(client):
         mock_post.assert_called_with(
             f"{Config.GESTOR_CLIENTES_BASE_URL}/clients/login",
             json={"email": data["email"], "password": data["password"]},
-            timeout=5,
+            timeout=900,
         )
 
 
