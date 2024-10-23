@@ -10,7 +10,7 @@ on:
       - '.github/workflows/reusable-deploy.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   deploy-api-gateway:
