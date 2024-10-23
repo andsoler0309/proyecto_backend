@@ -1,0 +1,27 @@
+name: Despliegue de generacion-reportes en GKE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'generacion-reportes/**'
+      - 'deployment/generacion-reportes-deployment.yaml'
+      - '.github/workflows/reusable-deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-generacion-reportes:
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      service-name: generacion-reportes
+      service-path: ./generacion-reportes
+      deployment-file: ./deployment/generacion-reportes-deployment.yaml
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+      GKE_ZONE: ${{ secrets.GKE_ZONE }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

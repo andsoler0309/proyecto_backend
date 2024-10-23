@@ -1,0 +1,110 @@
+name: Reusable Deploy to GKE
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        description: 'Nombre del servicio a desplegar'
+        required: true
+        type: string
+      service-path:
+        description: 'Ruta al directorio del servicio'
+        required: true
+        type: string
+      deployment-file:
+        description: 'Ruta al archivo de despliegue de Kubernetes'
+        required: true
+        type: string
+
+    secrets:
+      GCP_SA_KEY:
+        description: 'Clave de la cuenta de servicio de GCP'
+        required: true
+      GCP_PROJECT_ID:
+        description: 'ID del proyecto de GCP'
+        required: true
+      GKE_CLUSTER:
+        description: 'Nombre del clúster de GKE'
+        required: true
+      GKE_ZONE:
+        description: 'Zona del clúster de GKE'
+        required: true
+      GITHUB_TOKEN:
+        description: 'Token de GitHub para autenticar solicitudes a la API'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Configurar la autenticación de Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar gcloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          install_components: 'gke-gcloud-auth-plugin'
+
+      - name: Configurar kubectl
+        run: |
+          gcloud components install kubectl
+          gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configurar Docker para Artifact Registry
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Definir etiqueta única
+        id: tag
+        run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Construir y empujar la imagen Docker
+        run: |
+          SERVICE_NAME=${{ inputs.service-name }}
+          SERVICE_PATH=${{ inputs.service-path }}
+          TAG=${{ env.TAG }}
+          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:$TAG"
+
+          echo "Construyendo la imagen para $SERVICE_NAME con la etiqueta $TAG..."
+          docker build --platform linux/amd64 -t $IMAGE $SERVICE_PATH
+
+          echo "Empujando la imagen a Artifact Registry..."
+          docker push $IMAGE
+
+      - name: Actualizar el manifiesto de Kubernetes
+        run: |
+          SERVICE_NAME=${{ inputs.service-name }}
+          DEPLOYMENT_FILE=${{ inputs.deployment-file }}
+          TAG=${{ env.TAG }}
+          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:$TAG"
+
+          if [ -f "$DEPLOYMENT_FILE" ]; then
+            echo "Actualizando el manifiesto de $SERVICE_NAME con la imagen $IMAGE..."
+            sed -i "s|image: .*|image: $IMAGE|g" "$DEPLOYMENT_FILE"
+          else
+            echo "Advertencia: El archivo $DEPLOYMENT_FILE no existe. Asegúrate de que el manifiesto de Kubernetes esté correctamente nombrado."
+          fi
+
+      - name: Desplegar en GKE
+        run: |
+          kubectl apply -f ${{ inputs.deployment-file }}
+
+      - name: Configurar Git para Commits Automáticos
+        if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit y Push de Cambios Automatizados
+        if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
+        run: |
+          git add ${{ inputs.deployment-file }}
+          git commit -m "Auto-fix: Actualizar imagen de Docker para ${{ inputs.service-name }} [ci auto-fix]"
+          git push

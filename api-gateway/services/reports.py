@@ -1,5 +1,5 @@
 import requests
-from flask import current_app
+from flask import current_app, request
 from flask_restful import Resource
 from auth import client_required
 from config import Config
@@ -7,11 +7,11 @@ from config import Config
 
 class GetReportFromClient(Resource):
     @client_required
-    def post(self, current_client, client_id):
+    def get(self, current_client, client_id):
         try:
             report_response = requests.get(
                 f"{Config.GENERACION_REPORTES_BASE_URL}/reports/{client_id}",
-                timeout=900,
+                timeout=900
             )
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Reports Service: {e}")

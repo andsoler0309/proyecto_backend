@@ -1,0 +1,27 @@
+name: Despliegue de api-gateway en GKE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'api-gateway/**'
+      - 'deployment/api-gateway-deployment.yaml'
+      - '.github/workflows/reusable-deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-api-gateway:
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      service-name: api-gateway
+      service-path: ./api-gateway
+      deployment-file: ./deployment/api-gateway-deployment.yaml
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+      GKE_ZONE: ${{ secrets.GKE_ZONE }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,27 @@
+name: Despliegue de gestor-clientes en GKE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gestor-clientes/**'
+      - 'deployment/gestor-clientes-deployment.yaml'
+      - '.github/workflows/reusable-deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-gestor-clientes:
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      service-name: gestor-clientes
+      service-path: ./gestor-clientes
+      deployment-file: ./deployment/gestor-clientes-deployment.yaml
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+      GKE_ZONE: ${{ secrets.GKE_ZONE }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

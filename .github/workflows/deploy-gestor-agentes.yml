@@ -1,0 +1,27 @@
+name: Despliegue de gestor-agentes en GKE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gestor-agentes/**'
+      - 'deployment/gestor-agentes-deployment.yaml'
+      - '.github/workflows/reusable-deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-gestor-agentes:
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      service-name: gestor-agentes
+      service-path: ./gestor-agentes
+      deployment-file: ./deployment/gestor-agentes-deployment.yaml
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+      GKE_ZONE: ${{ secrets.GKE_ZONE }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
