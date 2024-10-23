@@ -149,9 +149,21 @@ def create_app():
         methods=["POST"],
     )
     api.add_resource(
+        IncidentChatBot,
+        "/chatbot/incident",
+        endpoint="incident_chatbot",
+        methods=["POST"],
+    )
+    api.add_resource(
         GetReportFromClient,
         "/reports/<string:client_id>",
         endpoint="get_report_from_client",
+        methods=["GET"],
+    )
+    api.add_resource(
+        GetReportInsights,
+        "/reports/<string:client_id>",
+        endpoint="get_report_insights",
         methods=["POST"],
     )
     api.add_resource(

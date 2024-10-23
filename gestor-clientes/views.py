@@ -4,10 +4,13 @@ from flask import request
 from models import db, Client, Plan
 from sqlalchemy.exc import IntegrityError
 from schemas import ClientSchema, PlanSchema, ClientPlanSchema
+from privacy import Privacy
 
 client_schema = ClientSchema()
 plan_schema = PlanSchema()
 client_plan_schema = ClientPlanSchema()
+
+privacy = Privacy()
 
 
 class ClientRegistration(Resource):
@@ -25,6 +28,9 @@ class ClientRegistration(Resource):
         if Client.query.filter_by(email=email).first():
             return {"msg": "Email already exists"}, 400
 
+        name = privacy.encrypt(name)
+        email = privacy.secure_email(email)["encrypted"]
+
         client = Client(name=name, email=email, company_name=company_name)
         client.set_password(password)
 
@@ -34,6 +40,9 @@ class ClientRegistration(Resource):
         except IntegrityError:
             db.session.rollback()
             return {"msg": "Error registering agent"}, 500
+
+        client.name = privacy.decrypt(client.name)
+        client.email = privacy.decrypt(client.email)
 
         return client_schema.dump(client), 201
 
@@ -46,6 +55,8 @@ class ClientLogin(Resource):
 
         if not email or not password:
             return {"msg": "Email and password are required"}, 400
+
+        email = privacy.secure_email(email)["encrypted"]
 
         client = Client.query.filter_by(email=email).first()
 
@@ -60,6 +71,10 @@ class ClientDetail(Resource):
         client = Client.query.get(client_id)
         if not client:
             return {"msg": "Client not found"}, 404
+
+        client.name = privacy.decrypt(client.name)
+        client.email = privacy.decrypt(client.email)
+
         return client_schema.dump(client), 200
 
     def put(self, client_id):
@@ -68,6 +83,8 @@ class ClientDetail(Resource):
             return {"msg": "Client not found"}, 404
 
         data = request.get_json()
+        data["name"] = privacy.encrypt(data["name"])
+        data["email"] = privacy.secure_email(data["email"])["encrypted"]
         try:
             client.name = data["name"]
             client.email = data["email"]
@@ -228,12 +245,19 @@ class ClientsByPlan(Resource):
         if not Plan.query.get(plan_id):
             return {"msg": "Plan not found"}, 404
         clients = Client.query.filter_by(plan_id=plan_id).all()
+
+        for client in clients:
+            client.name = privacy.decrypt(client.name)
+            client.email = privacy.decrypt(client.email)
         return client_schema.dump(clients, many=True), 200
 
 
 class Clients(Resource):
     def get(self):
         clients = Client.query.all()
+        for client in clients:
+            client.name = privacy.decrypt(client.name)
+            client.email = privacy.decrypt(client.email)
         return client_schema.dump(clients, many=True), 200
 
 
