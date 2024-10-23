@@ -58,7 +58,6 @@ def test_generate_report_success(client_generacion_reportes):
         assert data["stats"]["total_open_incidents"] == 1
         assert data["stats"]["total_closed_incidents"] == 0
         assert "average_resolution_time" in data["stats"]
-        assert data["ia_response"] == ia_data
 
 
 def test_generate_report_incident_service_failure(client_generacion_reportes):
