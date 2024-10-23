@@ -1,0 +1,27 @@
+name: Despliegue de servicio-ia en GKE
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'servicio-ia/**'
+      - 'deployment/servicio-ia-deployment.yaml'
+      - '.github/workflows/reusable-deploy.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-servicio-ia:
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      service-name: servicio-ia
+      service-path: ./servicio-ia
+      deployment-file: ./deployment/servicio-ia-deployment.yaml
+    secrets:
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+      GKE_ZONE: ${{ secrets.GKE_ZONE }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

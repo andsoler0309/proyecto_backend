@@ -1,8 +1,6 @@
 FROM python:3.9
 
 ENV PYTHONUNBUFFERED=1
-ENV DATABASE_URL=postgresql+psycopg2://postgres:1234@192.168.0.10/usuarios
-ENV GESTOR_INCIDENTES_BASE_URL=https://gestor-incidentes-649096178068.us-central1.run.app
 
 WORKDIR /app
 
