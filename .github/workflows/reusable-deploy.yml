@@ -99,15 +99,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-        
-      - name: Pull Latest Changes to Avoid Conflicts
-        if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
-        run: |
-          git pull --rebase origin main || { echo "Error al hacer pull"; exit 1; }
 
       - name: Commit y Push de Cambios Automatizados
         if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
         run: |
           git add ${{ inputs.deployment-file }}
           git commit -m "Auto-fix: Actualizar imagen de Docker para ${{ inputs.service-name }} [ci auto-fix]"
+          git pull --rebase origin main || { echo "Error al hacer pull"; exit 1; }
           git push
