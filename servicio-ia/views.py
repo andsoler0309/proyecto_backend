@@ -114,8 +114,7 @@ class Chatbot(Resource):
             return {
                 "msg": f"Entendido, quieres registrar el incidente con la siguiente descripción: {message}?"
             }, 200
-
-        if chatbot_state == ChatbotState.CONFIRM:
+        elif chatbot_state == ChatbotState.CONFIRM:
             if message.lower() == "si":
                 chatbot_conversation.state = ChatbotState.USER_ID
                 db.session.add(chatbot_conversation)
@@ -140,8 +139,7 @@ class Chatbot(Resource):
                 return {
                     "msg": "Porfavor describe el incidente que quieres registrar"
                 }, 200
-
-        if chatbot_state == ChatbotState.USER_ID:
+        elif chatbot_state == ChatbotState.USER_ID:
             try:
                 message = int(message)
             except ValueError:
@@ -164,14 +162,12 @@ class Chatbot(Resource):
                 "client_id": chatbot_conversation.client_id,
             }
 
-            print(incident)
             try:
                 incidents_response = requests.post(
                     f"{GESTOR_INCIDENTES_BASE_URL}/incidents",
                     json=incident,
                     timeout=900,
                 )
-                print(incidents_response)
             except requests.exceptions.RequestException as e:
                 current_app.logger.error(
                     f"Error communicating with Incidents Service: {e}"
@@ -179,11 +175,90 @@ class Chatbot(Resource):
                 return {"msg": "Error communicating with Incidents Service"}, 503
 
             return incidents_response.json(), incidents_response.status_code
+        else:
+            return {"msg": "No entendi tu respuesta, vuelve a iniciar con start"}, 400
+        
+
+class IncidentChatbot(Resource):
+    def post(self):
+        data = request.get_json()
+        chatbot_state = None
+        try:
+            message = data["message"]
+        except KeyError as e:
+            return {"msg": f"Missing required field: {str(e)}"}, 400
+        
+        if message == "start":
+            chatbot_conversation = ChatbotConversation(
+                state=ChatbotState.INCIDENT_ID,
+            )
+            db.session.add(chatbot_conversation)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                return {"msg": "Error creating chatbot conversation"}, 500
+            
+            return {
+                "msg": f"Hola, bienvenido al chatbot de incidentes, porfavor ingresa el id del incidente que quieres consultar",
+                "chatbot_conversation_id": chatbot_conversation.id,
+            }, 200
+        else:
+            try:
+                chatbot_conversation_id = data["chatbot_conversation_id"]
+            except KeyError as e:
+                return {"msg": f"Missing required field: {str(e)}"}, 400
+
+            chatbot_conversation = ChatbotConversation.query.get(
+                chatbot_conversation_id
+            )
+            if not chatbot_conversation:
+                return {"msg": "Chatbot conversation not found"}, 404
+
+            chatbot_state = chatbot_conversation.state
+
+        if chatbot_state == ChatbotState.INCIDENT_ID:
+            incident_id = message
+
+            chatbot_conversation.state = ChatbotState.WELCOME
+            db.session.add(chatbot_conversation)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                return {"msg": "Error updating chatbot conversation"}, 500
+
+            try:
+                incident_response = requests.get(
+                    f"{GESTOR_INCIDENTES_BASE_URL}/incidents/{incident_id}",
+                    timeout=900,
+                )
+                if incident_response.status_code != 200:
+                    return incident_response.json(), incident_response.status_code
+                incident = incident_response.json()
+            except requests.exceptions.RequestException as e:
+                current_app.logger.error(
+                    f"Error communicating with Incidents Service: {e}"
+                )
+                return {"msg": "Error communicating with Incidents Service"}, 503
+
+            return incident, 200
+        else:
+            return {"msg": "No entendi tu respuesta, vuelve a iniciar con start"}, 400
 
 
 class Report(Resource):
     def post(self, client_id):
-        message = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum"
+        body = request.get_json()
+        stat = body.get("stat")
+        if stat == "incidentes":
+            message = "incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+        elif stat == "compliance":
+            message = "amet consectetur adipiscing elit sed do eiusmod aliqua ut enim ad minim veniam quis nostrud"
+        elif stat == "tiempo":
+            message = "ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum"
+        else:
+            message = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut"
         return {"msg": message}, 200
 
 
@@ -200,11 +275,21 @@ class Incident(Resource):
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
+        
+        description = incident["description"]
+        if "ayuda" in description:
+            possible_solution = "incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat",
+        elif "error" in description:
+            possible_solution = "amet consectetur adipiscing elit sed do eiusmod aliqua ut enim ad minim veniam quis nostrud",
+        elif "falla" in description:
+            possible_solution = "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore",
+        else:
+            possible_solution = "ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum",
 
         response = {
             "incident_id": incident["id"],
             "description": incident["description"],
-            "possible_solution": "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore",
+            "possible_solution": possible_solution,
         }
 
         return response, 200

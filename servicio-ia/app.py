@@ -25,6 +25,7 @@ def create_app():
     # Register API resources
     api.add_resource(Ping, "/servicio-ia/ping")
     api.add_resource(Chatbot, "/chatbot")
+    api.add_resource(IncidentChatbot, "/chatbot/incident")
     api.add_resource(Report, "/report/<string:client_id>")
     api.add_resource(Incident, "/incident/<string:incident_id>")
 

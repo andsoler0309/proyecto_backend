@@ -11,6 +11,7 @@ class ChatbotState(Enum):
     USER_ID = "user_id"
     CONFIRM = "confirm"
     COMPANY_NAME_SELECTION = "company_name_selection"
+    INCIDENT_ID = "incident_id" 
 
 
 class ChatbotConversation(db.Model):

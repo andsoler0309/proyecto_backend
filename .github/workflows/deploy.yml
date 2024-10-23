@@ -3,7 +3,7 @@ name: CI/CD para despliegue en GKE
 on:
   push:
     branches:
-      - main
+      - main-deploy
 
 permissions:
   contents: write
@@ -27,10 +27,10 @@ jobs:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         install_components: 'gke-gcloud-auth-plugin'
 
-    # - name: Configurar kubectl
-    #   run: |
-    #     gcloud components install kubectl
-    #     gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
+    - name: Configurar kubectl
+      run: |
+        gcloud components install kubectl
+        gcloud container clusters get-credentials ${{ secrets.GKE_CLUSTER }} --zone ${{ secrets.GKE_ZONE }} --project ${{ secrets.GCP_PROJECT_ID }}
 
     - name: Configurar Docker para Artifact Registry
       run: |
@@ -57,7 +57,7 @@ jobs:
           fi
         done
 
-    - name: Desplegar a Cloud Run
+    - name: Actualizar los manifiestos de Kubernetes con las nuevas imágenes
       run: |
         for service in */; do
           # Ignorar las carpetas deployment/ y .github/
@@ -67,56 +67,32 @@ jobs:
 
           if [ -d "$service" ]; then
             SERVICE_NAME=$(basename "$service")
-            IMAGE_URL=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}
+            DEPLOYMENT_FILE="deployment/${SERVICE_NAME}-deployment.yaml"
 
-            echo "Desplegando $SERVICE_NAME a Cloud Run con la imagen $IMAGE_URL..."
+            if [ -f "$DEPLOYMENT_FILE" ]; then
+              echo "Actualizando el manifiesto de $SERVICE_NAME con la imagen us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}..."
 
-            gcloud run deploy $SERVICE_NAME \
-              --image $IMAGE_URL \
-              --region us-central1 \
-              --platform managed \
-              --allow-unauthenticated \
-              --project ${{ secrets.GCP_PROJECT_ID }} \
-              --port 5000
+              # Reemplazar únicamente la línea que contiene 'image:' con la nueva imagen
+              sed -i "s|image: .*|image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}|g" "$DEPLOYMENT_FILE"
+            else
+              echo "Advertencia: El archivo $DEPLOYMENT_FILE no existe. Asegúrate de que el manifiesto de Kubernetes esté correctamente nombrado."
+            fi
           fi
         done
 
-    # - name: Actualizar los manifiestos de Kubernetes con las nuevas imágenes
-    #   run: |
-    #     for service in */; do
-    #       # Ignorar las carpetas deployment/ y .github/
-    #       if [[ "$service" == "deployment/" || "$service" == ".github/" || "$service" == "gestor-fidelizacion/" || "$service" == "vista-360/" ]]; then
-    #         continue
-    #       fi
+    - name: Desplegar en GKE
+      run: |
+        kubectl apply -f deployment/
 
-    #       if [ -d "$service" ]; then
-    #         SERVICE_NAME=$(basename "$service")
-    #         DEPLOYMENT_FILE="deployment/${SERVICE_NAME}-deployment.yaml"
+    - name: Configurar Git para Commits Automáticos
+      if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
 
-    #         if [ -f "$DEPLOYMENT_FILE" ]; then
-    #           echo "Actualizando el manifiesto de $SERVICE_NAME con la imagen us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}..."
-
-    #           # Reemplazar únicamente la línea que contiene 'image:' con la nueva imagen
-    #           sed -i "s|image: .*|image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/abcall/$SERVICE_NAME:${TAG}|g" "$DEPLOYMENT_FILE"
-    #         else
-    #           echo "Advertencia: El archivo $DEPLOYMENT_FILE no existe. Asegúrate de que el manifiesto de Kubernetes esté correctamente nombrado."
-    #         fi
-    #       fi
-    #     done
-
-    # - name: Desplegar en GKE
-    #   run: |
-    #     kubectl apply -f deployment/
-
-    # - name: Configurar Git para Commits Automáticos
-    #   if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
-    #   run: |
-    #     git config user.name "github-actions[bot]"
-    #     git config user.email "github-actions[bot]@users.noreply.github.com"
-
-    # - name: Commit y Push de Cambios Automatizados
-    #   if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
-    #   run: |
-    #     git add deployment/
-    #     git commit -m "Auto-fix: Actualizar imágenes de Docker [ci auto-fix]"
-    #     git push
+    - name: Commit y Push de Cambios Automatizados
+      if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[ci auto-fix]')
+      run: |
+        git add deployment/
+        git commit -m "Auto-fix: Actualizar imágenes de Docker [ci auto-fix]"
+        git push
