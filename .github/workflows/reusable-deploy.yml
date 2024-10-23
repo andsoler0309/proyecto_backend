@@ -29,9 +29,6 @@ on:
       GKE_ZONE:
         description: 'Zona del clúster de GKE'
         required: true
-      GITHUB_TOKEN:
-        description: 'Token de GitHub para autenticar solicitudes a la API'
-        required: true
 
 jobs:
   deploy:
