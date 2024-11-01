@@ -27,6 +27,7 @@ class PlanSchema(SQLAlchemyAutoSchema):
     id = fields.String()
     nombre = fields.String(required=True)
     descripcion = fields.String(required=True)
+    features = fields.List(fields.String())
 
 
 class ClientPlanSchema(SQLAlchemyAutoSchema):
