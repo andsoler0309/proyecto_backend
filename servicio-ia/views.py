@@ -252,13 +252,14 @@ class Report(Resource):
         body = request.get_json()
         stat = body.get("stat")
         if stat == "incidentes":
-            message = "incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
+            message = "Los incidentes reportados incluyen interrupciones del sistema, problemas de datos y otros errores críticos que afectan el rendimiento y la disponibilidad del servicio."
         elif stat == "compliance":
-            message = "amet consectetur adipiscing elit sed do eiusmod aliqua ut enim ad minim veniam quis nostrud"
+            message = "Las verificaciones de cumplimiento indican la un buen porcentaje de incidentes resueltos."
         elif stat == "tiempo":
-            message = "ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum"
+            message = "El análisis de tiempo incluye tiempos de respuesta, tiempos de procesamiento y métricas de rendimiento general para garantizar operaciones eficientes."
         else:
-            message = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut"
+            message = "El tipo de informe especificado no se reconoce. Por favor, revise la entrada e intente de nuevo."
+
         return {"msg": message}, 200
 
 
@@ -278,13 +279,13 @@ class Incident(Resource):
         
         description = incident["description"]
         if "ayuda" in description:
-            possible_solution = "incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat",
+            possible_solution = "Para resolver este incidente, proporcione orientación adicional a los usuarios sobre cómo navegar y resolver problemas comunes. Puede ser útil un manual de usuario o un sistema de asistencia en línea."
         elif "error" in description:
-            possible_solution = "amet consectetur adipiscing elit sed do eiusmod aliqua ut enim ad minim veniam quis nostrud",
+            possible_solution = "Revise los errores potenciales en la configuración del sistema o de los datos. Verifique los registros de errores para identificar cualquier falla en la comunicación o discrepancias en los datos."
         elif "falla" in description:
-            possible_solution = "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore",
+            possible_solution = "Investigue posibles fallas en el sistema y revise los registros para un análisis detallado de la causa raíz. La revisión de hardware o red también podría ser necesaria si se identifican patrones recurrentes."
         else:
-            possible_solution = "ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum",
+            possible_solution = "Consulte la documentación de soporte o póngase en contacto con el soporte técnico para recibir asistencia adicional en la resolución del incidente."
 
         response = {
             "incident_id": incident["id"],
