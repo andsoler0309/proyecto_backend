@@ -24,13 +24,12 @@ class ClientRegistration(Resource):
 
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
-
+        
+        email = privacy.secure_email(email)["encrypted"]
         if Client.query.filter_by(email=email).first():
             return {"msg": "Email already exists"}, 400
 
         name = privacy.encrypt(name)
-        email = privacy.secure_email(email)["encrypted"]
-
         client = Client(name=name, email=email, company_name=company_name)
         client.set_password(password)
 
@@ -196,6 +195,9 @@ class ClientPlan(Resource):
         db.session.add(client)
         db.session.commit()
 
+        client.name = privacy.decrypt(client.name)
+        client.email = privacy.decrypt(client.email)
+
         return client_schema.dump(client), 200
 
     def get(self, client_id):
@@ -206,6 +208,9 @@ class ClientPlan(Resource):
         plan = Plan.query.get(client.plan_id)
         if not plan:
             return {"msg": "Plan not found"}, 404
+        
+        client.name = privacy.decrypt(client.name)
+        client.email = privacy.decrypt(client.email)
 
         return client_plan_schema.dump(plan), 200
 
@@ -219,6 +224,9 @@ class DeleteClientPlan(Resource):
         client.plan_id = None
         db.session.add(client)
         db.session.commit()
+
+        client.name = privacy.decrypt(client.name)
+        client.email = privacy.decrypt(client.email)
 
         return client_schema.dump(client), 200
 
@@ -236,6 +244,9 @@ class SelectClientPlan(Resource):
         client.plan_id = plan_id
         db.session.add(client)
         db.session.commit()
+
+        client.name = privacy.decrypt(client.name)
+        client.email = privacy.decrypt(client.email)
 
         return client_schema.dump(client), 200
 
