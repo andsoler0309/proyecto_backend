@@ -250,18 +250,35 @@ class IncidentChatbot(Resource):
 class Report(Resource):
     def post(self, client_id):
         body = request.get_json()
-        stat = body.get("stat")
-        if stat == "incidentes":
+        user_message = body.get("user_message")
+        if "incidentes" in user_message:
             message = "Los incidentes reportados incluyen interrupciones del sistema, problemas de datos y otros errores críticos que afectan el rendimiento y la disponibilidad del servicio."
-        elif stat == "compliance":
-            message = "Las verificaciones de cumplimiento indican la un buen porcentaje de incidentes resueltos."
-        elif stat == "tiempo":
+        elif "compliance" in user_message:
+            message = "Las verificaciones de cumplimiento indican un buen porcentaje de incidentes resueltos."
+        elif "tiempo" in user_message:
             message = "El análisis de tiempo incluye tiempos de respuesta, tiempos de procesamiento y métricas de rendimiento general para garantizar operaciones eficientes."
+        elif user_message == "total_incidents":
+            message = "El número total de incidentes reportados es de 100. Se recomienda que en un futuro se contrate más personal para manejar la carga de trabajo."
+        elif user_message == "total_open_incidents":
+            message = "El número total de incidentes abiertos es de 50. Se recomienda priorizar la resolución de estos incidentes para evitar interrupciones en el servicio."
+        elif user_message == "total_closed_incidents":
+            message = "El número total de incidentes cerrados es de 50. Se recomienda realizar un análisis detallado de los incidentes resueltos para identificar patrones y prevenir futuras interrupiones."
+        elif user_message == "average_resolution_time":
+            message = "El tiempo promedio de resolución de incidentes es de 5 días. Se recomienda establecer un objetivo de tiempo de resolución y monitorear el rendimiento para mejorar la eficiencia."
+        elif user_message == "average_response_time":
+            message = "El tiempo promedio de respuesta a incidentes es de 2 horas. Se recomienda implementar un sistema de priorización de incidentes para garantizar una respuesta oportuna a problemas críticos."
+        elif user_message == "total_phone_incidents":
+            message = "El número total de incidentes reportados por teléfono es de 30. Se recomienda mejorar la accesibilidad y la calidad del soporte telefónico para satisfacer las necesidades de los usuarios."
+        elif user_message == "total_email_incidents":
+            message = "El número total de incidentes reportados por correo electrónico es de 40. Se recomienda optimizar los procesos de comunicación por correo electrónico para una resolución más rápida de los incidentes."
+        elif user_message == "total_chat_incidents":
+            message = "El número total de incidentes reportados por chat es de 30. Se recomienda mejorar la eficiencia y la calidad del soporte por chat para una mejor experiencia del usuario."
+        elif user_message == "compliance_rate":
+            message = "La tasa de cumplimiento de incidentes resueltos es del 80%. Se recomienda establecer un proceso de revisión y validación de incidentes para garantizar la calidad y precisión de las resoluciones."
         else:
             message = "El tipo de informe especificado no se reconoce. Por favor, revise la entrada e intente de nuevo."
 
         return {"msg": message}, 200
-
 
 class Incident(Resource):
     def get(self, incident_id):
