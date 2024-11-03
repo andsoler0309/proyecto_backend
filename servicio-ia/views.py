@@ -250,17 +250,35 @@ class IncidentChatbot(Resource):
 class Report(Resource):
     def post(self, client_id):
         body = request.get_json()
-        stat = body.get("stat")
-        if stat == "incidentes":
-            message = "incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"
-        elif stat == "compliance":
-            message = "amet consectetur adipiscing elit sed do eiusmod aliqua ut enim ad minim veniam quis nostrud"
-        elif stat == "tiempo":
-            message = "ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum"
+        user_message = body.get("user_message")
+        if "incidentes" in user_message:
+            message = "Los incidentes reportados incluyen interrupciones del sistema, problemas de datos y otros errores críticos que afectan el rendimiento y la disponibilidad del servicio."
+        elif "compliance" in user_message:
+            message = "Las verificaciones de cumplimiento indican un buen porcentaje de incidentes resueltos."
+        elif "tiempo" in user_message:
+            message = "El análisis de tiempo incluye tiempos de respuesta, tiempos de procesamiento y métricas de rendimiento general para garantizar operaciones eficientes."
+        elif user_message == "total_incidents":
+            message = "El número total de incidentes reportados es de 100. Se recomienda que en un futuro se contrate más personal para manejar la carga de trabajo."
+        elif user_message == "total_open_incidents":
+            message = "El número total de incidentes abiertos es de 50. Se recomienda priorizar la resolución de estos incidentes para evitar interrupciones en el servicio."
+        elif user_message == "total_closed_incidents":
+            message = "El número total de incidentes cerrados es de 50. Se recomienda realizar un análisis detallado de los incidentes resueltos para identificar patrones y prevenir futuras interrupiones."
+        elif user_message == "average_resolution_time":
+            message = "El tiempo promedio de resolución de incidentes es de 5 días. Se recomienda establecer un objetivo de tiempo de resolución y monitorear el rendimiento para mejorar la eficiencia."
+        elif user_message == "average_response_time":
+            message = "El tiempo promedio de respuesta a incidentes es de 2 horas. Se recomienda implementar un sistema de priorización de incidentes para garantizar una respuesta oportuna a problemas críticos."
+        elif user_message == "total_phone_incidents":
+            message = "El número total de incidentes reportados por teléfono es de 30. Se recomienda mejorar la accesibilidad y la calidad del soporte telefónico para satisfacer las necesidades de los usuarios."
+        elif user_message == "total_email_incidents":
+            message = "El número total de incidentes reportados por correo electrónico es de 40. Se recomienda optimizar los procesos de comunicación por correo electrónico para una resolución más rápida de los incidentes."
+        elif user_message == "total_chat_incidents":
+            message = "El número total de incidentes reportados por chat es de 30. Se recomienda mejorar la eficiencia y la calidad del soporte por chat para una mejor experiencia del usuario."
+        elif user_message == "compliance_rate":
+            message = "La tasa de cumplimiento de incidentes resueltos es del 80%. Se recomienda establecer un proceso de revisión y validación de incidentes para garantizar la calidad y precisión de las resoluciones."
         else:
-            message = "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut"
-        return {"msg": message}, 200
+            message = "El tipo de informe especificado no se reconoce. Por favor, revise la entrada e intente de nuevo."
 
+        return {"msg": message}, 200
 
 class Incident(Resource):
     def get(self, incident_id):
@@ -278,13 +296,13 @@ class Incident(Resource):
         
         description = incident["description"]
         if "ayuda" in description:
-            possible_solution = "incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat",
+            possible_solution = "Para resolver este incidente, proporcione orientación adicional a los usuarios sobre cómo navegar y resolver problemas comunes. Puede ser útil un manual de usuario o un sistema de asistencia en línea."
         elif "error" in description:
-            possible_solution = "amet consectetur adipiscing elit sed do eiusmod aliqua ut enim ad minim veniam quis nostrud",
+            possible_solution = "Revise los errores potenciales en la configuración del sistema o de los datos. Verifique los registros de errores para identificar cualquier falla en la comunicación o discrepancias en los datos."
         elif "falla" in description:
-            possible_solution = "lore ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore",
+            possible_solution = "Investigue posibles fallas en el sistema y revise los registros para un análisis detallado de la causa raíz. La revisión de hardware o red también podría ser necesaria si se identifican patrones recurrentes."
         else:
-            possible_solution = "ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum",
+            possible_solution = "Consulte la documentación de soporte o póngase en contacto con el soporte técnico para recibir asistencia adicional en la resolución del incidente."
 
         response = {
             "incident_id": incident["id"],

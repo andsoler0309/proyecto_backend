@@ -6,6 +6,7 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from sqlalchemy import Enum as SQLAEnum
 from enum import Enum
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.dialects.postgresql import JSON
 
 
 db = SQLAlchemy()
@@ -21,6 +22,7 @@ class Plan(db.Model):
     )
     nombre = db.Column(db.String(50), nullable=False)
     descripcion = db.Column(db.Text, nullable=False)
+    features = db.Column(JSON, nullable=False)
 
     def __repr__(self):
         return f"<Plan {self.nombre}>"

@@ -194,8 +194,7 @@ class GetClientsByPlan(Resource):
 
 
 class GetPlans(Resource):
-    @client_required
-    def get(self, current_client):
+    def get(self):
         try:
             plans_response = requests.get(
                 f"{Config.GESTOR_CLIENTES_BASE_URL}/plans",
