@@ -13,29 +13,9 @@ GESTOR_INCIDENTES_BASE_URL = os.environ.get(
     "GESTOR_INCIDENTES_BASE_URL", "http://localhost:5001"
 )
 
-clientes_data_mock = [
-    {
-        "id": "asd",
-        "name": "Juan Perez",
-        "email": "test@test.com",
-        "password": "123",
-        "company_name": "Company 1",
-    },
-    {
-        "id": "qwe",
-        "name": "Maria Rodriguez",
-        "email": "test@test.com",
-        "password": "123",
-        "company_name": "Company 2",
-    },
-    {
-        "id": "zxc",
-        "name": "Pedro Martinez",
-        "email": "test@test.com",
-        "password": "123",
-        "company_name": "Company 3",
-    },
-]
+GESTOR_CLIENTES_BASE_URL = os.environ.get(
+    "GESTOR_CLIENTES_BASE_URL", "http://localhost:5001"
+)
 
 
 class Ping(Resource):
@@ -44,6 +24,24 @@ class Ping(Resource):
 
 
 class Chatbot(Resource):
+    def get_clients(self):
+        try:
+            clients_response = requests.get(
+                f"{GESTOR_CLIENTES_BASE_URL}/clients",
+                timeout=900,
+            )
+            if clients_response.status_code != 200:
+                current_app.logger.error(
+                    f"Error fetching incidents: {clients_response.text}"
+                )
+                return {"msg": "Error fetching incidents"}, 500
+            clients = clients_response.json()
+        except requests.exceptions.RequestException as e:
+            current_app.logger.error(f"Error communicating with Incidents Service: {e}")
+            return {"msg": "Error communicating with Incidents Service"}, 503
+
+        return clients
+
     def post(self):
         data = request.get_json()
         chatbot_state = None
@@ -62,8 +60,9 @@ class Chatbot(Resource):
             except IntegrityError:
                 db.session.rollback()
                 return {"msg": "Error creating chatbot conversation"}, 500
-
-            companies = [cliente["company_name"] for cliente in clientes_data_mock]
+            
+            clients = self.get_clients()
+            companies = [cliente["company_name"] for cliente in clients]
             companies_numbered = "\n".join(
                 [f"{i+1}. {company}" for i, company in enumerate(companies)]
             )
@@ -87,7 +86,8 @@ class Chatbot(Resource):
 
         if chatbot_state == ChatbotState.COMPANY_NAME_SELECTION:
             company_number_selected = int(message) - 1
-            client_id = clientes_data_mock[company_number_selected]["id"]
+            clients = self.get_clients()
+            client_id = clients[company_number_selected]["id"]
 
             chatbot_conversation.state = ChatbotState.DESCRIPTION
             chatbot_conversation.client_id = client_id

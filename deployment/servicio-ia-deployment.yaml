@@ -25,6 +25,8 @@ spec:
           env:
             - name: GESTOR_INCIDENTES_BASE_URL
               value: http://servicio-gestor-incidentes
+            - name: GESTOR_CLIENTES_BASE_URL
+              value: http://servicio-gestor-clientes
             - name: DATABASE_URL
               valueFrom:
                   secretKeyRef:
