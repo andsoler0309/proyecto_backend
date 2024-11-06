@@ -157,6 +157,7 @@ services:
       # - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GESTOR_INCIDENTES_BASE_URL=http://gestor-incidentes:5000
       - DATABASE_URL=postgresql://postgres:postgres@usuarios-db:5432/usuariosdb
+      - GESTOR_CLIENTES_BASE_URL=http://gestor-clientes:5000
     networks:
       - abcall-net
       - usuarios-net
