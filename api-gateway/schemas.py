@@ -74,6 +74,11 @@ class ClientCreationSchema(Schema):
     name = fields.Str(required=True, validate=validate.Length(min=1))
     company_name = fields.Str(required=True, validate=validate.Length(min=1))
 
+class ClientUpdateSchema(Schema):
+    email = fields.Email(required=True)
+    name = fields.Str(required=True, validate=validate.Length(min=1))
+    company_name = fields.Str(required=True, validate=validate.Length(min=1))
+
 
 class PlanSchema(Schema):
     id = fields.Int(dump_only=True)

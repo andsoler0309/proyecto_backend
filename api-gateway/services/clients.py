@@ -6,6 +6,7 @@ from schemas import (
     PlanSchema,
     ClientCreationSchema,
     ClientPlanSchema,
+    ClientUpdateSchema,
     LoginSchema,
 )
 from marshmallow import ValidationError
@@ -18,6 +19,7 @@ client_schema = ClientSchema()
 plan_schema = PlanSchema()
 client_plan_schema = ClientPlanSchema()
 login_schema = LoginSchema()
+client_update_schema = ClientUpdateSchema()
 
 
 class CreateClient(Resource):
@@ -113,10 +115,11 @@ class GetClientPlan(Resource):
 
 
 class UpdateClient(Resource):
-    def put(self, client_id):
+    @client_required
+    def put(self, current_client, client_id):
         data = request.get_json()
         try:
-            validated_data = client_creation_schema.load(data)
+            validated_data = client_update_schema.load(data)
         except ValidationError as err:
             return {"msg": "Invalid data", "errors": err.messages}, 400
 
