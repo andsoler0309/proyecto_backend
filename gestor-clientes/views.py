@@ -97,6 +97,9 @@ class ClientDetail(Resource):
         except IntegrityError:
             db.session.rollback()
             return {"msg": "Error updating client"}, 500
+        
+        client.name = privacy.decrypt(client.name)
+        client.email = privacy.decrypt(client.email)
 
         return client_schema.dump(client), 200
 
