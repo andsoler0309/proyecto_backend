@@ -451,7 +451,8 @@ class AdminUnlockAgent(Resource):
         # Unlock the agent account via Gestor-Agente
         try:
             response = requests.post(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock", timeout=900
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock",
+                timeout=900,
             )
             if response.status_code == 200:
                 # Reset failed attempts

@@ -177,7 +177,7 @@ class Chatbot(Resource):
             return incidents_response.json(), incidents_response.status_code
         else:
             return {"msg": "No entendi tu respuesta, vuelve a iniciar con start"}, 400
-        
+
 
 class IncidentChatbot(Resource):
     def post(self):
@@ -187,7 +187,7 @@ class IncidentChatbot(Resource):
             message = data["message"]
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
-        
+
         if message == "start":
             chatbot_conversation = ChatbotConversation(
                 state=ChatbotState.INCIDENT_ID,
@@ -198,7 +198,7 @@ class IncidentChatbot(Resource):
             except IntegrityError:
                 db.session.rollback()
                 return {"msg": "Error creating chatbot conversation"}, 500
-            
+
             return {
                 "msg": f"Hola, bienvenido al chatbot de incidentes, porfavor ingresa el id del incidente que quieres consultar",
                 "chatbot_conversation_id": chatbot_conversation.id,
@@ -280,6 +280,7 @@ class Report(Resource):
 
         return {"msg": message}, 200
 
+
 class Incident(Resource):
     def get(self, incident_id):
         try:
@@ -293,7 +294,7 @@ class Incident(Resource):
         except requests.exceptions.RequestException as e:
             current_app.logger.error(f"Error communicating with Incidents Service: {e}")
             return {"msg": "Error communicating with Incidents Service"}, 503
-        
+
         description = incident["description"]
         if "ayuda" in description:
             possible_solution = "Para resolver este incidente, proporcione orientación adicional a los usuarios sobre cómo navegar y resolver problemas comunes. Puede ser útil un manual de usuario o un sistema de asistencia en línea."
