@@ -212,3 +212,22 @@ class GetIncidentPossibleSolution(Resource):
             return {"msg": "Error communicating with Incidents Service"}, 503
 
         return solution, 200
+    
+
+class IncidentSolutionDescription(Resource):
+    def post(self):
+        data = request.get_json()
+        try:
+            solution_response = requests.post(
+                f"{Config.SERVICIO_IA_BASE_URL}/incident-solution",
+                timeout=900,
+                json=data,
+            )
+            if solution_response.status_code != 200:
+                return solution_response.json(), solution_response.status_code
+            solution = solution_response.json()
+        except requests.exceptions.RequestException as e:
+            current_app.logger.error(f"Error communicating with IA Service: {e}")
+            return {"msg": "Error communicating with IA Service"}, 503
+
+        return solution, 200
