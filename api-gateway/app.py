@@ -119,6 +119,12 @@ def create_app():
         methods=["GET"],
     )
     api.add_resource(
+        UpdateClient,
+        "/clients/<string:client_id>",
+        endpoint="update_client",
+        methods=["PUT"],
+    )
+    api.add_resource(
         UpdateClientPlan,
         "/clients/<string:client_id>/plan",
         endpoint="update_client_plan",
@@ -174,7 +180,6 @@ def create_app():
     )
 
     return app
-
 
 app = create_app()
 
