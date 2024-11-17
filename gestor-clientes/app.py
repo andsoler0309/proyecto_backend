@@ -30,7 +30,7 @@ def create_app():
                         "Incluye registro de PQRs, atención telefónica por agentes, búsqueda en base de conocimientos, "
                         "y procesos de escalamiento automatizados."
                     ),
-                    features=["Registro de PQRs vía telefonica"]
+                    features=["Registro de PQRs vía telefonica"],
                 ),
                 Plan(
                     nombre="Empresario",
@@ -42,8 +42,8 @@ def create_app():
                     features=[
                         "Registro de PQRs vía telefonica",
                         "Registro de PQRs vía Chatbot",
-                        "Registro de PQRs vía App Móvil"
-                    ]
+                        "Registro de PQRs vía App Móvil",
+                    ],
                 ),
                 Plan(
                     nombre="Empresario Plus",
@@ -58,8 +58,8 @@ def create_app():
                         "Registro de PQRs vía App Móvil",
                         "Registro de PQRs vía correo electrónico",
                         "Aprendizaje de máquina",
-                        "Inteligencia artificial"
-                    ]
+                        "Inteligencia artificial",
+                    ],
                 ),
             ]
             db.session.add_all(plans)

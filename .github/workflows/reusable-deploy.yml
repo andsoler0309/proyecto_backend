@@ -16,7 +16,6 @@ on:
         required: true
         type: string
 
-
     secrets:
       GCP_SA_KEY:
         description: 'Clave de la cuenta de servicio de GCP'

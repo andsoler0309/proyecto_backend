@@ -24,7 +24,7 @@ class ClientRegistration(Resource):
 
         except KeyError as e:
             return {"msg": f"Missing required field: {str(e)}"}, 400
-        
+
         email = privacy.secure_email(email)["encrypted"]
         if Client.query.filter_by(email=email).first():
             return {"msg": "Email already exists"}, 400
@@ -97,7 +97,7 @@ class ClientDetail(Resource):
         except IntegrityError:
             db.session.rollback()
             return {"msg": "Error updating client"}, 500
-        
+
         client.name = privacy.decrypt(client.name)
         client.email = privacy.decrypt(client.email)
 
@@ -211,7 +211,7 @@ class ClientPlan(Resource):
         plan = Plan.query.get(client.plan_id)
         if not plan:
             return {"msg": "Plan not found"}, 404
-        
+
         client.name = privacy.decrypt(client.name)
         client.email = privacy.decrypt(client.email)
 

@@ -74,6 +74,7 @@ class ClientCreationSchema(Schema):
     name = fields.Str(required=True, validate=validate.Length(min=1))
     company_name = fields.Str(required=True, validate=validate.Length(min=1))
 
+
 class ClientUpdateSchema(Schema):
     email = fields.Email(required=True)
     name = fields.Str(required=True, validate=validate.Length(min=1))
@@ -113,3 +114,4 @@ class ClientPlanSchema(Schema):
 class ChatBotSchema(Schema):
     message = fields.Str(required=True)
     chatbot_conversation_id = fields.Str(required=False)
+    language = fields.Str(required=False)

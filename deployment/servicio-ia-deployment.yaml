@@ -19,12 +19,14 @@ spec:
     spec:
       containers:
         - name: servicio-ia
-          image: us-central1-docker.pkg.dev/abcall/abcall/servicio-ia:dab7258
+          image: us-central1-docker.pkg.dev/abcall/abcall/servicio-ia:aa5b467
           ports:
             - containerPort: 5000
           env:
             - name: GESTOR_INCIDENTES_BASE_URL
               value: http://servicio-gestor-incidentes
+            - name: GESTOR_CLIENTES_BASE_URL
+              value: http://servicio-gestor-clientes
             - name: DATABASE_URL
               valueFrom:
                   secretKeyRef:
