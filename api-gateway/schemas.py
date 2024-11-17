@@ -114,3 +114,4 @@ class ClientPlanSchema(Schema):
 class ChatBotSchema(Schema):
     message = fields.Str(required=True)
     chatbot_conversation_id = fields.Str(required=False)
+    language = fields.Str(required=False)

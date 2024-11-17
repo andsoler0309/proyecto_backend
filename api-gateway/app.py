@@ -161,6 +161,12 @@ def create_app():
         methods=["POST"],
     )
     api.add_resource(
+        UnifiedChatbot,
+        "/unified-chatbot",
+        endpoint="unified_chatbot",
+        methods=["POST"],
+    )
+    api.add_resource(
         GetReportFromClient,
         "/reports/<string:client_id>",
         endpoint="get_report_from_client",
@@ -170,6 +176,12 @@ def create_app():
         GetReportInsights,
         "/reports/<string:client_id>",
         endpoint="get_report_insights",
+        methods=["POST"],
+    )
+    api.add_resource(
+        GetReportInsightsLanguages,
+        "/report-languages/<string:client_id>",
+        endpoint="report_languages",
         methods=["POST"],
     )
     api.add_resource(
