@@ -687,3 +687,19 @@ class Incident(Resource):
         }
 
         return response, 200
+    
+
+class IncidentSolutionDescription(Resource):
+    def post(self):
+        body = request.get_json()
+        description = body.get("description")
+        if "ayuda" in description:
+            possible_solution = "Para resolver este incidente, proporcione orientación adicional a los usuarios sobre cómo navegar y resolver problemas comunes. Puede ser útil un manual de usuario o un sistema de asistencia en línea."
+        elif "error" in description:
+            possible_solution = "Revise los errores potenciales en la configuración del sistema o de los datos. Verifique los registros de errores para identificar cualquier falla en la comunicación o discrepancias en los datos."
+        elif "falla" in description:
+            possible_solution = "Investigue posibles fallas en el sistema y revise los registros para un análisis detallado de la causa raíz. La revisión de hardware o red también podría ser necesaria si se identifican patrones recurrentes."
+        else:
+            possible_solution = "Consulte la documentación de soporte o póngase en contacto con el soporte técnico para recibir asistencia adicional en la resolución del incidente."
+
+        return {"possible_solution": possible_solution}, 200

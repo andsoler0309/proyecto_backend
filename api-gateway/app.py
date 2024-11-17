@@ -190,6 +190,12 @@ def create_app():
         endpoint="get_incident_possible_solution",
         methods=["GET"],
     )
+    api.add_resource(
+        IncidentSolutionDescription,
+        "/incident-solution",
+        endpoint="incident_solution_description",
+        methods=["POST"],
+    )
 
     return app
 
