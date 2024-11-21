@@ -480,3 +480,19 @@ class AdminResetAgent(Resource):
         except Exception as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
             return {"msg": "Error communicating with Gestor-Agente"}, 503
+
+
+class AgentDetail(Resource):
+    def get(self, agent_id):
+        # Retrieve agent details from Gestor-Agente
+        try:
+            response = requests.get(
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=900
+            )
+            if response.status_code == 200:
+                return response.json(), 200
+            else:
+                return {"msg": "Agent not found"}, 404
+        except Exception as e:
+            current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
+            return {"msg": "Error communicating with Gestor-Agente"}, 503
