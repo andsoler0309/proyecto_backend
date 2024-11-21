@@ -43,6 +43,12 @@ def create_app():
         methods=["DELETE"],
     )
     api.add_resource(
+        AgentDetail,
+        "/agents/<string:agent_id>",
+        endpoint="agent_detail",
+        methods=["GET"],
+    )
+    api.add_resource(
         CreateIncident, "/incidents", endpoint="create_incident", methods=["POST"]
     )
     api.add_resource(
