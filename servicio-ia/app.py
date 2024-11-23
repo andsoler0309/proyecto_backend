@@ -28,6 +28,9 @@ def create_app():
     api.add_resource(IncidentChatbot, "/chatbot/incident")
     api.add_resource(Report, "/report/<string:client_id>")
     api.add_resource(Incident, "/incident/<string:incident_id>")
+    api.add_resource(UnifiedChatbot, "/unified-chatbot")
+    api.add_resource(ReportLanguages, "/report-languages/<string:client_id>")
+    api.add_resource(IncidentSolutionDescription, "/incident-solution")
 
     return app
 

@@ -451,7 +451,8 @@ class AdminUnlockAgent(Resource):
         # Unlock the agent account via Gestor-Agente
         try:
             response = requests.post(
-                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock", timeout=900
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}/unlock",
+                timeout=900,
             )
             if response.status_code == 200:
                 # Reset failed attempts
@@ -476,6 +477,22 @@ class AdminResetAgent(Resource):
                 return {"msg": f"Agent {agent_id} has been reset"}, 200
             else:
                 return {"msg": "Failed to reset agent"}, response.status_code
+        except Exception as e:
+            current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
+            return {"msg": "Error communicating with Gestor-Agente"}, 503
+
+
+class AgentDetail(Resource):
+    def get(self, agent_id):
+        # Retrieve agent details from Gestor-Agente
+        try:
+            response = requests.get(
+                f"{Config.GESTOR_AGENTES_BASE_URL}/agents/{agent_id}", timeout=900
+            )
+            if response.status_code == 200:
+                return response.json(), 200
+            else:
+                return {"msg": "Agent not found"}, 404
         except Exception as e:
             current_app.logger.error(f"Error communicating with Gestor-Agente: {e}")
             return {"msg": "Error communicating with Gestor-Agente"}, 503

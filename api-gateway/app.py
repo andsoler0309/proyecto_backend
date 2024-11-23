@@ -43,6 +43,12 @@ def create_app():
         methods=["DELETE"],
     )
     api.add_resource(
+        AgentDetail,
+        "/agents/<string:agent_id>",
+        endpoint="agent_detail",
+        methods=["GET"],
+    )
+    api.add_resource(
         CreateIncident, "/incidents", endpoint="create_incident", methods=["POST"]
     )
     api.add_resource(
@@ -161,6 +167,12 @@ def create_app():
         methods=["POST"],
     )
     api.add_resource(
+        UnifiedChatbot,
+        "/unified-chatbot",
+        endpoint="unified_chatbot",
+        methods=["POST"],
+    )
+    api.add_resource(
         GetReportFromClient,
         "/reports/<string:client_id>",
         endpoint="get_report_from_client",
@@ -173,13 +185,26 @@ def create_app():
         methods=["POST"],
     )
     api.add_resource(
+        GetReportInsightsLanguages,
+        "/report-languages/<string:client_id>",
+        endpoint="report_languages",
+        methods=["POST"],
+    )
+    api.add_resource(
         GetIncidentPossibleSolution,
         "/incidents/<string:incident_id>/solution",
         endpoint="get_incident_possible_solution",
         methods=["GET"],
     )
+    api.add_resource(
+        IncidentSolutionDescription,
+        "/incident-solution",
+        endpoint="incident_solution_description",
+        methods=["POST"],
+    )
 
     return app
+
 
 app = create_app()
 
