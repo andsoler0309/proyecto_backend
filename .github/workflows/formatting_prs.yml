@@ -115,8 +115,16 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+      - name: Configurar Firebase Credentials
+        env:
+          FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+        run: |
+          echo "${FIREBASE_CREDENTIALS}" > /tmp/firebase-credentials.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-credentials.json" >> $GITHUB_ENV
       - name: Ejecutar pruebas
         working-directory: gestor-incidentes
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-credentials.json
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-cov

@@ -135,9 +135,12 @@ services:
   gestor-incidentes:
     build:
       context: ./gestor-incidentes
+    volumes:
+      - ./config/abcallgrupo12-firebase-adminsdk-xszwo-48eed87144.json:/app/abcallgrupo12-firebase-adminsdk-xszwo-48eed87144.json:ro
     ports:
       - "5003:5000"
     environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/abcallgrupo12-firebase-adminsdk-xszwo-48eed87144.json
       - DATABASE_URL=postgresql://postgres:postgres@incidentes-db:5432/incidentesdb
       # - VIEW_360_BASE_URL=http://vista-360:5000
       - SERVICIO_IA_BASE_URL=http://servicio-ia:5000
