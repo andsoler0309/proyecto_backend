@@ -31,8 +31,18 @@ spec:
                   secretKeyRef:
                     name: app-secrets 
                     key: DATABASE_URL
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/firebase-credentials.json
+          volumeMounts:
+            - name: firebase-credentials
+              mountPath: /secrets
+              readOnly: true
           # Realizar pull siempre a la imagen
           imagePullPolicy: Always
+      volumes:
+        - name: firebase-credentials
+          secret:
+            secretName: firebase-credentials
 
 ---
 apiVersion: cloud.google.com/v1
