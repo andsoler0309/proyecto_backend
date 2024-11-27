@@ -29,9 +29,6 @@ on:
       GKE_ZONE:
         description: 'Zona del clúster de GKE'
         required: true
-      FIREBASE_CREDENTIALS:
-        description: 'Firebase Credentials JSON'
-        required: true
 
 jobs:
   deploy:
@@ -64,11 +61,6 @@ jobs:
       - name: Definir etiqueta única
         id: tag
         run: echo "TAG=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-      
-      - name: Crear Secret de Kubernetes para Firebase
-        run: |
-          printf '%s' "${{ secrets.FIREBASE_CREDENTIALS }}" > firebase-credentials.json
-          kubectl create secret generic firebase-credentials --from-file=firebase-credentials.json --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Construir y empujar la imagen Docker
         run: |
