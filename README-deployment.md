@@ -143,6 +143,7 @@ kubectl delete all --all -n default
 - Aplicar secretos si se tiene
 ```shell
 kubectl apply -f deployment/k8s-secrets.yaml
+kubectl get secret firebase-credentials -o jsonpath="{.data.firebase-credentials\.json}" | base64 --decode
 ```
 
 - Aplicar deployment servicios (experimento)
