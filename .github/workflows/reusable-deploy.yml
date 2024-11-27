@@ -67,7 +67,7 @@ jobs:
       
       - name: Crear Secret de Kubernetes para Firebase
         run: |
-          echo "${{ secrets.FIREBASE_CREDENTIALS }}" > firebase-credentials.json
+          printf '%s' "${{ secrets.FIREBASE_CREDENTIALS }}" > firebase-credentials.json
           kubectl create secret generic firebase-credentials --from-file=firebase-credentials.json --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Construir y empujar la imagen Docker
