@@ -146,3 +146,6 @@ cython_debug/
 .idea
 #DataBase
 test.db
+
+#firebase
+gestor-incidentes/firebase-credentials.json
