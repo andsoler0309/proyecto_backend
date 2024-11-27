@@ -6,6 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from models import RegistrationMediumEnum, StatusEnum
 import os
 import requests
+import firebase_admin
+from firebase_admin import messaging, credentials
 
 incident_schema = IncidentSchema()
 incidents_schema = IncidentSchema(many=True)
@@ -13,6 +15,9 @@ incidents_schema = IncidentSchema(many=True)
 incident_update_schema = IncidentUpdateSchema()
 
 SERVICIO_IA_BASE_URL = os.environ.get("SERVICIO_IA_BASE_URL", "http://localhost:5001")
+GOOGLE_APPLICATION_CREDENTIALS = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+cred = credentials.Certificate(GOOGLE_APPLICATION_CREDENTIALS)
+firebase_admin.initialize_app(cred)
 
 
 class IncidentList(Resource):
@@ -112,6 +117,27 @@ class IncidentDetail(Resource):
         except IntegrityError:
             db.session.rollback()
             return {"msg": "Error updating incident"}, 500
+
+        # The topic name can be optionally prefixed with "/topics/".
+        topic = incident_id
+
+        notification = messaging.Notification(
+            title="ABCall",
+            body="Hay cambios en el incidente"
+        )
+        # See documentation on defining a message payload.
+        message = messaging.Message(
+            data={
+                'incident_id': incident_id,
+            },
+            notification=notification,  
+            topic=topic,
+        )
+
+        # Send a message to the devices subscribed to the provided topic.
+        response = messaging.send(message)
+        # Response is a message ID string.
+        print('Successfully sent message:', response)
 
         return incident_schema.dump(incident), 200
 
