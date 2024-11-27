@@ -41,7 +41,6 @@ spec:
         - name: firebase-credentials
           secret:
             secretName: firebase-credentials
-
 ---
 apiVersion: cloud.google.com/v1
 kind: BackendConfig
